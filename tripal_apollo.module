@@ -1,0 +1,136 @@
+<?php
+
+require_once 'includes/tripal_apollo_api.inc';
+require_once 'includes/tripal_apollo.node.inc';
+require_once 'includes/tripal_apollo_mail.inc';
+
+//forms dont need to be
+//require_once 'includes/tripal_apollo_admin.form.inc';
+//require_once 'includes/tripal_apollo_registration.form.inc';
+
+
+/**
+ * Implements hook_permission().
+ */
+function tripal_apollo_permission() {
+  return [
+    'administer tripal apollo' => [
+      //TODO: what form?
+      'title' => t('Administer tripal apollo form'),
+    ],
+    'administer apollo users' => [
+      'title' => t('Administer apollo users list'),
+    ],
+    'access apollo' => [
+      'title' => t('Access apollo'),
+    ],
+  ];
+}
+
+
+/**
+ * Implements hook_theme().
+ */
+function tripal_apollo_theme($existing, $type, $theme, $path) {
+
+  $items = [
+    'node__apollo_instance' => [
+      // Don't specify the path in the template name.
+      // Unless you have your template inside a directory within this module.
+      'template' => 'theme/node--apollo_instance',
+      'variables' => ['node' => (object) []],
+    ],
+    'tripal_apollo_approve_user_request_form' => [
+      'render element' => 'form',
+    ],
+  ];
+
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function tripal_apollo_menu() {
+  $items = [];
+
+  $items['apollo-registration'] = [
+    'title' => 'Apollo Registration',
+    'Description' => "Unregistered users can request Apollo access",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['tripal_apollo_registration_form'],
+    'access arguments' => ['access apollo'],
+    'type' => MENU_CALLBACK,
+    'weight' => 100,
+    'file' => 'includes/tripal_apollo_registration.form.inc',
+  ];
+
+  /**
+   * Below will be for both Apollo 1 and Apollo 2.
+   * (previously separate tabs)
+   */
+  $items['admin/tripal/apollo/users'] = [
+    'title' => 'Apollo User Administration',
+    'description' => 'List of Apollo user requests to approve/reject',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['tripal_apollo_admin_form'],
+    'access arguments' => ['administer apollo users'],
+    'file' => 'includes/tripal_apollo_admin.form.inc',
+  ];
+
+
+  $items['admin/tripal/apollo/users/%'] = [
+    'title' => 'Approve or Reject the user request for web apollo account',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['tripal_apollo_approve_user_request_form', 4],
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/tripal_apollo_approve_user_request.form.inc',
+  ];
+
+
+  /***
+   *
+   * Remove organism/email from this page.
+   * Change to assign organisms to instances?
+   *
+   */
+
+  $items['admin/structure/webapollo/settings'] = [
+    'title' => 'Settings',
+    'description' => 'Build webapollo settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['web_apollo_admin'],
+    'access arguments' => ['administer web-apollo'],
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'web_apollo.admin.inc',
+  ];
+
+  //TODO: I would like to get away from this.  I'm pretty sure that users can request roles?  Let's try it that way.
+
+  return $items;
+}
+
+
+/**
+ * Theme for the user approval page.
+ * @param $variables
+ *
+ * @return string
+ */
+function theme_tripal_apollo_approve_user_request_form($variables) {
+  $form = $variables['form'];
+  $output = '';
+  if (!empty($form['web_apollo_table']['name']['#value'])) {
+    $output = '<table>';
+    $output .= '<tr><td>Name</td><td> ' . $form['web_apollo_table']['name']['#value'] . "</td></tr>";
+    $output .= '<Tr><td>Email</td><td>' . $form['web_apollo_table']['email']['#value'] . "</td></tr>";
+    $output .= '<tr><td>Organism</td><td> ' . $form['web_apollo_table']['organism']['#value'] . "</td></tr>";
+    $output .= '<tr><td>Status</td><td>' . drupal_render($form['web_apollo_table']['status']) . '</td></tr>';
+    $output .= "</table>";
+  }
+  $output .= drupal_render_children($form);
+
+  return $output;
+}

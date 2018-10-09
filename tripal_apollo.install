@@ -1,0 +1,191 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the node module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function tripal_apollo_schema() {
+
+  $schema['apollo_instance'] = [
+    'description' => "Apollo instance table.  Each instance is a specific Apollo server.",
+    'fields' => [
+      'nid' => [
+        'description' => t('The primary identifier for a node.'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'url' => [
+        'not null' => TRUE,
+        'type' => 'varchar',
+        'length' => 64,
+      ],
+      'name' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+      ],
+      'admin_name' => [
+        'not null' => TRUE,
+        'type' => 'varchar',
+        'length' => 64,
+      ],
+      'admin_password' => [
+        'not null' => TRUE,
+        'type' => 'varchar',
+        'length' => 64,
+      ],
+      'apollo_version' => [
+        'type' => 'int',
+        'size' => 'small'
+        //1 or 2
+      ],
+    ],
+    'unique keys' => [
+      'URL' => ['URL'],
+      'name' => ['name'],
+      'nid' => ['nid'],
+    ],
+    'primary key' => ['nid'],
+  ];
+
+
+  $schema['apollo_instance_organism'] = [
+    'description' => "Simple linker table to associate organisms with apollo instances.",
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary key: apollo_instance_organism id',
+      ],
+      'instance_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => "Apollo instance id, as specified in apollo_instance",
+      ],
+      'organism_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => "Chado organism record ID.",
+      ],
+    ],
+    'unique keys' => [
+      'instance organism' => ['instance_id', 'organism_id'],
+    ],
+    'primary key' => ['id'],
+  ];
+
+
+  //TODO: should we ditch this? Instead link drupal users to chado contacts.
+
+  $schema['webapollo_users'] = [
+    'description' => 'Web apollo users table.',
+    'fields' => [
+      'uid' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique user ID.',
+      ],
+      'name' => [
+        'type' => 'varchar',
+        'length' => 60,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Unique user name.',
+      ],
+      'pass' => [
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => "User's password (md5 hash).",
+      ],
+      'email' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => FALSE,
+        'default' => '',
+        'description' => "User's email address.",
+      ],
+      'organisms' => [
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Organisms',
+      ],
+      'institution' => [
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Institution',
+      ],
+      'comment' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'The comment body.',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp for when user was created.',
+      ],
+      'status' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 2,
+        'size' => 'tiny',
+        'description' => 'Whether the user is active(1) or blocked(0).',
+      ],
+    ],
+    'unique keys' => [
+      'email_organism' => ['email', 'organisms'],
+    ],
+    'primary key' => ['uid'],
+  ];
+
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function tripal_apollo_uninstall() {
+  // Remove records from variable table.
+  variable_del('web_apollo_organism');
+  variable_del('web_apollo_recipients');
+
+  /**
+   * Remove all Apollo nodes
+   */
+
+
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'apollo')
+    // Restrict to Published nodes.
+    ->propertyCondition('status', 1)
+    // Restrict to nodes the current user has permission to view.
+    ->addTag('node_access');
+  $entities = $query->execute();
+
+  // Get all apollo nodes and delete them
+  $nodes = node_load_multiple(array_keys($entities['node']));
+  foreach ($nodes as $node) {
+    print "Delete node " . $node->title . "\n";
+    $nrs = node_revision_list($node);
+    foreach ($nrs as $nr) {
+      node_revision_delete($nr->vid);
+    }
+    node_delete($node->nid);
+  }
+}

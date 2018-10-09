@@ -1,0 +1,54 @@
+#web-apollo-registration fieldset {
+  border: 0px;
+}
+
+#web-apollo-registration .form-textarea-wrapper textarea, #web-apollo-registration .resizable-textarea .grippie {
+  width: 40%;
+  margin-left: 148px;
+}
+
+#web-apollo-registration .form-item label {
+  float: left;
+  margin-right: 10px;
+  width: 15%;
+}
+#web-apollo-registration .form-text {
+  width: 40%;
+}
+
+#web-apollo-registration #edit-captcha-response {
+  width: 25%;
+}
+
+#web-apollo-registration .form-item {
+  padding: 0;
+  margin: 1.5em 0 1.5em 0;
+  width: auto;
+  clear: both;
+}
+
+#web-apollo-registration .form-item-institution {
+  padding-top: 1.5em;
+}
+
+#web-apollo-registration .form-item-organism select {
+  width: 40%;
+}
+
+.captcha .help-block {
+  display: none;
+}
+
+.description {
+  font-size: 0.85em;
+  position: relative;
+  top: -21px;
+}
+
+.form-item-captcha-response > span {
+  float: left;
+  margin-right: 10px;
+}
+.panel-default > .panel-heading {
+  display: none;
+}
