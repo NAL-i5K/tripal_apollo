@@ -53,32 +53,7 @@ function tripal_apollo_schema() {
     'primary key' => ['nid'],
   ];
 
-
-  $schema['apollo_instance_organism'] = [
-    'description' => "Simple linker table to associate organisms with apollo instances.",
-    'fields' => [
-      'id' => [
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => 'Primary key: apollo_instance_organism id',
-      ],
-      'instance_id' => [
-        'type' => 'int',
-        'not null' => TRUE,
-        'description' => "Apollo instance id, as specified in apollo_instance",
-      ],
-      'organism_id' => [
-        'type' => 'int',
-        'not null' => TRUE,
-        'description' => "Chado organism record ID.",
-      ],
-    ],
-    'unique keys' => [
-      'instance organism' => ['instance_id', 'organism_id'],
-    ],
-    'primary key' => ['id'],
-  ];
+  $schema = tripal_apollo_add_instance_user_organism_schemas($schema);
 
 
   //TODO: should we ditch this? Instead link drupal users to chado contacts.
@@ -189,3 +164,212 @@ function tripal_apollo_uninstall() {
     node_delete($node->nid);
   }
 }
+
+
+function tripal_apollo_add_instance_user_organism_schemas($schema) {
+
+  $schema['apollo_instance_organism'] = [
+    'description' => "Simple linker table to associate organisms with apollo instances.",
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Primary key: apollo_instance_organism id',
+      ],
+      'instance_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => "Apollo instance id, as specified in apollo_instance",
+      ],
+      'organism_id' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => "Chado organism record ID.",
+      ],
+    ],
+    'unique keys' => [
+      'instance organism' => ['instance_id', 'organism_id'],
+    ],
+    'primary key' => ['id'],
+  ];
+
+
+  $schema['apollo_user_organism_instance'] = [
+    'description' => 'links web apollo user IDs to organisms.  A user can have access to multiple (but not all) organisms on a given instance.  An organism may also be found on multiple instances.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'organism_id' => [
+        'type' => 'int',
+        'description' => 'chado organism.organism_id',
+        'not null' => TRUE,
+      ],
+      'instance_id' => [
+        'type' => 'int',
+        'description' => "apollo_instance.id",
+        'not null' => TRUE,
+
+      ],
+      'apollo_user_id' => [
+        'type' => 'int',
+        'description' => 'apollo_user.id',
+        'not null' => TRUE,
+      ],
+    ],
+    'primary_key' => ['id'],
+  ];
+
+  $schema['apollo_user'] = [
+    'description' => 'Web apollo users table.',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'uid' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'Drupal user ID',
+      ],
+      'name' => [
+        'type' => 'varchar',
+        'length' => 60,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Unique user name.',
+      ],
+      'pass' => [
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => "User's password (md5 hash).",
+      ],
+      'email' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => "User's email address.",
+      ],
+      'institution' => [
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Institution',
+      ],
+      'comment' => [
+        'type' => 'text',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'The comment body.',
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp for when user was created.',
+      ],
+    ],
+    'primary key' => ['id'],
+  ];
+  return $schema;
+}
+//
+///**
+// * Creates new schema tables for instances, users, and organisms.  Migrates users from the old schema to the new one if possible via email.
+// */
+//function tripal_apollo_update_7100() {
+//
+//  $schema = [];
+//
+//  $schema = tripal_apollo_add_instance_user_organism_schemas($schema);
+//
+//  //migrate webapollo_users to new schema
+//
+//
+//  $user_emails = db_select('public.webapollo_users', 't')
+//    ->fields('t', ['email'])
+//    ->distinct()
+//    ->select()
+//    ->execute();
+//
+//  foreach ($user_emails as $email){
+//
+//    //Do not confuse this with webapollo_users.uid they are not the same.
+//    $uid = db_select('public.users', 't')
+//      ->addField('t', 'uid')
+//      ->condition('mail', $email)
+//      ->execute()
+//      ->fetchField();
+//
+//    if (!$uid){
+//      print("Unable to migrate user: " . $email . ".\nThey will not lose access, but their Drupal account will not be linked to Apollo.");
+//      continue;
+//    }
+//
+//    $credentials = db_select('public.webapollo_users', 't')
+//      ->fields('t')
+//      ->condition('email', $email)
+//      ->select()
+//      ->execute()
+//      ->fetchAll();
+//
+//    $apollo_credentials = [];
+//
+//    foreach ($credentials as $credential){
+//      $name = $credential->name;
+//      $pass = $credential->pass;
+//      $organism = $credential->organisms;
+//      $institution = $credential->institution;
+//      $comment = $credential->comment;
+//      $created = $credential->created;
+//      $status = $credential->status;
+//
+//      $id  = db_select('public.apollo_user', 't')
+//        ->fields('id')
+//        ->condition('name', $name)
+//        ->condition('pass', $pass)
+//        ->condition('institution', $institution)
+//        ->condition('email', $email)
+//        ->execute()
+//        ->fetchField();
+//
+//      if (!$id){
+//        $id = db_insert('public.apollo_user', 't')
+//        ->fields([
+//          'uid' => $uid,
+//          'name' => $name,
+//          'pass' => $pass,
+//          'email' => $email,
+//          'institution' => $institution,
+//          'comment' => $comment,
+//          'created' => $created
+//        ])
+//        ->execute();
+//      }
+//
+//      //TODO: I need to use the web_apollo organism api to figure out which organism this is in chado unfortunately.
+//      $organism_id = chado_get_organism(['organism_id' => "shoot i dont know, i have a string"]);
+//      //Add this organism instance
+//      db_insert('public.apollo_user_organism_instance')
+//        ->fields([
+//          'organism_id' ,
+//          'instance_id' => 1,
+//          'apollo_user_id' =>$id
+//        ])
+//        ->execute();
+//
+//
+//    }
+//
+//  }
+//  //TODO unfinished because of above issue.
+//  //Drop webapollo_users
+//}
