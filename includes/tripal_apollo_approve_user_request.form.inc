@@ -189,6 +189,8 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state){
 
     //TODO:  sounds like apollo 1 support feature-level permissions.  How do we suppor this?
 
+    // if apollo 1, do something
+
     //Only on prod we have data for species seqids.txt files, but not on dev. change the seqids.txt file while testing on gmod-dev server
     /*($organism_short_name == 'diacit')
       $seqids = '/app/data/other_species/'.$organism_short_name.'/seqids/seqids.txt';

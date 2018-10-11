@@ -39,7 +39,7 @@ function tripal_apollo_mail($key, &$message, $params) {
 
   switch ($key) {
     //switching on $key lets you create variations of the email based on the $key parameter
-    case 'webapollo_mail':
+    case 'notify_admin_organism_request':
       $message['subject'] = t('Web Apollo Registration', $variables, ['langcode' => $language->language]); //$variabless required even if not used to get $language in there
 
       //the email body is here, inside the $message array
@@ -51,7 +51,7 @@ function tripal_apollo_mail($key, &$message, $params) {
       $message['headers']['Content-Type'] = 'text/html; charset=UTF-8; format=flowed';
 
       break;
-    case 'webapollo_user_email':
+    case 'notify_user_organism_request':
       $get_user_before_at = explode("@", $params['mail']);
       $message['subject'] = t('Web Apollo registration for !organism', $variables, ['langcode' => $language->language]);
       $message['body'][] = t("Dear !user, <br><br> Thank you for registering to annotate !organism.", $variables, ['langcode' => $language->language]);
