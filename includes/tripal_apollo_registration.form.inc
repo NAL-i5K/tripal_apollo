@@ -97,14 +97,14 @@ function tripal_apollo_registration_form_validate($form, &$form_state) {
   $cnt = 0;
 
   if ($results) {
-    $message = "You are already registered for the following organisms:\n";
+    $message = "You are already registered for the following organisms: ";
 
     foreach ($results as $key => $result) {
 
       //TODO: Previous entries store a special organism/genus key instead of organism_id currently.
       //see @ticket 11
       $organism = chado_get_organism(['organism_id' => $result->organisms]);
-      $message .= $organism->abbreviation . "\n";
+      $message .= $organism->abbreviation . ", ";
     }
     form_set_error('organism', $message);
 

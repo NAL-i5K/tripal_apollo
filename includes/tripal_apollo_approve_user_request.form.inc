@@ -44,6 +44,20 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $uid){
     '#value' => $organism_value,
   ];
 
+  //Look up instance for this organism
+
+  $query =db_select('apollo_instance_organism', 'aio');
+  $query->join('apollo_instance', 'ai', 'ai.id  = aio.instance_id');
+  $query->addField('ai', 'name');
+  $query->condition('aio.organism_id', $organism_object->organism_id);
+  $instance_name = $query->execute()
+    ->fetchField();
+
+  $form['web_apollo_table']['instance'] = [
+    '#type' => 'value',
+    '#value' => $instance_name,
+  ];
+
   $status = '';
 
   if ($data->status == 1) {
@@ -112,8 +126,8 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state){
     //todo:  Figure out what these correspond to so we can store in our node.
 
     $db_name = "Get this from our node";
-    $db_user = "what do we do here";
-    $db_pass = "what do we do here";
+    $db_user = "Get this from our node";
+    $db_pass = "Get this from our node";
 
     /****
      * The goal is to make the password same for all organism for same emailid.
@@ -206,6 +220,9 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state){
     //Send email to the user about the login credentials to the web apollo site
     $user_email_sent = drupal_mail('web_apollo', 'webapollo_user_approve_email', $to, language_default(), $values, $from, TRUE);
 
+    dpm($user_email_sent);
+
+
     if (!$user_email_sent) {
       drupal_set_message(t('Failed to send the email due to some technical problems'));
     }
@@ -216,6 +233,8 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state){
         ->execute();
       drupal_set_message(t('Successfully an email was sent to %email regarding the status approved.'), ['%email' => $values['email']], $type = 'status');
     }
+
+    dpm($status);
 
     //Displaying status message on the site
     $status = ($status == 1) ? 'Approved' : 'Rejected';
