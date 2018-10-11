@@ -48,6 +48,11 @@ function tripal_apollo_schema() {
         'size' => 'small'
         //1 or 2
       ],
+      'base_table' => [
+        'type' => 'varchar',
+        'length' => 64,
+        'description' => 'The chado base table this instance is associated with.  It could be organism'
+      ]
     ],
     'unique keys' => [
       'URL' => ['URL'],
@@ -172,8 +177,8 @@ function tripal_apollo_uninstall() {
 
 function tripal_apollo_add_instance_user_organism_schemas($schema) {
 
-  $schema['apollo_instance_organism'] = [
-    'description' => "Simple linker table to associate organisms with apollo instances.",
+  $schema['apollo_instance_record'] = [
+    'description' => "Simple linker table to associate chado records with apollo instances.",
     'fields' => [
       'id' => [
         'type' => 'serial',
@@ -186,28 +191,28 @@ function tripal_apollo_add_instance_user_organism_schemas($schema) {
         'not null' => TRUE,
         'description' => "Apollo instance id, as specified in apollo_instance",
       ],
-      'organism_id' => [
+      'record_id' => [
         'type' => 'int',
         'not null' => TRUE,
-        'description' => "Chado organism record ID.",
+        'description' => "Chado primary record ID for the corresponding instance base table.",
       ],
     ],
     'unique keys' => [
-      'apollo_instance_organism_uq1' => ['instance_id'],
+      'apollo_instance_record_uq1' => ['record_id'],
     ],
     'primary key' => ['id'],
   ];
 
 
-  $schema['apollo_user_organism_instance'] = [
-    'description' => 'links web apollo user IDs to organisms.  A user can have access to multiple (but not all) organisms on a given instance.  An organism may also be found on multiple instances.',
+  $schema['apollo_user_record_instance'] = [
+    'description' => 'links web apollo user IDs to chado records.  A user can have access to multiple (but not all) records on a given instance.  A record may only be found on one instances.',
     'fields' => [
       'id' => [
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ],
-      'organism_id' => [
+      'record_id' => [
         'type' => 'int',
         'description' => 'chado organism.organism_id',
         'not null' => TRUE,
@@ -216,7 +221,6 @@ function tripal_apollo_add_instance_user_organism_schemas($schema) {
         'type' => 'int',
         'description' => "apollo_instance.id",
         'not null' => TRUE,
-
       ],
       'apollo_user_id' => [
         'type' => 'int',

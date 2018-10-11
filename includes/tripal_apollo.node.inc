@@ -83,10 +83,21 @@ function apollo_instance_form($node, &$form_state) {
 
   $form['core']['url'] = [
     '#type' => 'textfield',
-    '#title' => t("URL of Apollo server"),
+    '#title' => t("URL of Apollo Server"),
     '#required' => TRUE,
     '#default_value' => isset($node->url) ? $node->url : '',
 
+  ];
+
+
+  $table_choices = ['organism' => 'Organism', 'Analysis' => 'Analysis', 'project '=> 'Project'];
+
+  $form['core']['base_table'] = [
+    '#type' => 'select',
+    '#options' => $table_choices,
+    '#title' => t("Chado Base Table"),
+    '#description' => 'Each record can only be associated with one instance.  We suggest associating instances with organisms.  However, if you would like to support different assemblies for the same organism, you can use the chado project or analysis table instead.',
+    '#default_value' => isset($node->base_table) ? $node->base_table : 'organism',
   ];
 
   $select = [1 => 'Apollo 1', 2 => 'Apollo 2'];
