@@ -7,10 +7,6 @@
  *  hook_form() registration form for the web apollo
  */
 function tripal_apollo_registration_form($form, &$form_state) {
-//  $form['#attached']['css'] = [
-//    drupal_get_path('module', 'tripal_apollo') . '/css/registration.css',
-//  ];
-
 
   $form['instructions'] = [
     '#markup' => '<div id=\"tripal_apollo_param\">Complete the form below and click \'Submit\' to register for an Apollo account.  Only registered users can view, create or change annotations.</div>'
