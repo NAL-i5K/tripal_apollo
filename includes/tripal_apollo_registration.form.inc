@@ -7,25 +7,24 @@
  *  hook_form() registration form for the web apollo
  */
 function tripal_apollo_registration_form($form, &$form_state) {
-  $form['#attached']['css'] = [
-    drupal_get_path('module', 'tripal_apollo') . '/css/registration.css',
-  ];
 
+  $form['instructions'] = [
+    '#markup' => '<div id=\"tripal_apollo_param\">Complete the form below and click \'Submit\' to register for an Apollo account.  Only registered users can view, create or change annotations.</div>'
+  ];
   $form['name'] = [
     '#type' => 'textfield',
     '#title' => t('Full Name'),
     '#maxlength' => 255,
     '#required' => TRUE,
-    '#prefix' => "<div id=\"tripal_apollo_param\">Complete the form below and click 'Submit' to register for an Apollo account.  Only registered users can view, create or change annotations.",
-    '#suffix' => '</div>',
   ];
 
-  //TODO If the user is logged in we don't need this.
   $form['mail'] = [
     '#type' => 'textfield',
     '#title' => t('Email Address'),
     '#maxlength' => 255,
     '#required' => TRUE,
+    '#description' => 'The email address you will use to log in to the Apollo server.',
+    '#default_value' => NULL,
   ];
 
   //TODO: functionality could allow you to associate organisms with web apollo if necessary?  Otherwise, just all chado organisms.
@@ -41,6 +40,7 @@ function tripal_apollo_registration_form($form, &$form_state) {
     '#multiple' => TRUE,
     '#required' => TRUE,
     '#empty_option' => "Please select an Organism",
+    '#description' => 'The organisms you would like access to.',
   ];
 
   $form['institution'] = [
@@ -59,7 +59,6 @@ function tripal_apollo_registration_form($form, &$form_state) {
     '#type' => 'submit',
     '#value' => t('Submit'),
   ];
-
   return $form;
 }
 
@@ -78,44 +77,42 @@ function tripal_apollo_registration_form_validate($form, &$form_state) {
   }
   $institution = $form_state['input']['institution'];
   if (!preg_match('!^[\w @-]*$!', $institution)) {
-    form_set_error('institution', t('Your Name can only contains numbers, letters @  - _.'));
+    form_set_error('institution', t('Your institution name can only contains numbers, letters @  - _.'));
   }
   if (!valid_email_address($form_state['values']['mail'])) {
     form_set_error('mail', t('You must enter a valid e-mail address.'));
   }
-  $organism = $form_state['values']['organism'];
+  $organisms = $form_state['values']['organism'];
   $email = $form_state['values']['mail'];
-  // getting only array values from associated array(not key values)
 
-  //TODO: deal with this section
-  $organism_array_values = array_values($organism);
+  //Check if this email is already associated with this organism.
 
   $results = db_select('webapollo_users', 'w')
     ->fields('w', ['uid', 'organisms'])
     ->condition('w.email', $email)
-    ->condition('w.organisms', $organism_array_values, 'IN')
+    ->condition('w.organisms', $organisms, 'IN')
     ->execute()
     ->fetchAll();
-  $tripal_apollo_organism = variable_get('tripal_apollo_organism');
 
   $cnt = 0;
-  foreach ($results as $key => $result) {
-    // $organism_message .= rtrim($organism_data[$result->organisms]) . ", ";
-    $cnt++;
-  }
-  $organism_message = "";
 
-  $organism_message = rtrim($organism_message, ', ');
+  if ($results) {
+    $message = "You are already registered for the following organisms: ";
 
-  if (!empty($organism_message)) {
-    $str_organism_message = ($cnt > 1) ? "organism's " : "organism ";
-    $message = 'You already registered for the ' . $str_organism_message . $organism_message;
+    foreach ($results as $key => $result) {
+
+      //TODO: Previous entries store a special organism/genus key instead of organism_id currently.
+      //see @ticket 11
+      $organism = chado_get_organism(['organism_id' => $result->organisms]);
+      $message .= $organism->abbreviation . ", ";
+    }
     form_set_error('organism', $message);
+
   }
 }
 
 function tripal_apollo_registration_form_submit($form, &$form_state) {
-  $recipients = variable_get('tripal_apollo_recipients');
+  $admin_email = variable_get('site_mail');
   $values = $form_state['values'];
 
   /****
@@ -123,6 +120,9 @@ function tripal_apollo_registration_form_submit($form, &$form_state) {
    * First check for the email already registered for any organism with status=1, if yes then take the most recent password.
    * IF not then check for email with status=2, then take most recent password and update in webapollo_users table.
    */
+
+  //TODO:  Switching to a different schema would be really helpful here.
+
   $email = $values['mail'];
   $check_email_status1_exists = db_select('webapollo_users', 'w')
     ->fields('w', ['uid', 'name', 'pass', 'organisms'])
@@ -169,7 +169,7 @@ function tripal_apollo_registration_form_submit($form, &$form_state) {
   $from = $values['name'] . "<" . $values['mail'] . ">";
 
   // Send the e-mail to the recipients using the site default language.
-  $sent = drupal_mail('tripal_apollo', 'webapollo_mail', $recipients, language_default(), $values, $from, TRUE);
+  $sent = drupal_mail('tripal_apollo', 'notify_admin_organism_request', $admin_email, language_default(), $values, $from, TRUE);
 
   if (empty($sent['result']) || ($sent['result'] != 1)) {
     /*handle send fail, $sent ===false when mail fails, but it won't always recognize a failure*/
@@ -180,7 +180,7 @@ function tripal_apollo_registration_form_submit($form, &$form_state) {
   }
 
   //Email to the registered user stating successfully registered and once approved from admin you can login to the site
-  $user_email_sent = drupal_mail('tripal_apollo', 'webapollo_user_email', $values['mail'], language_default(), $values, FROM_ADDRESS, TRUE);
+  $user_email_sent = drupal_mail('tripal_apollo', 'notify_user_organism_request', $values['mail'], language_default(), $values, $admin_email, TRUE);
 
   if (empty($user_email_sent['result']) || ($user_email_sent['result'] != 1)) {
     drupal_set_message(t('Failed to send the email due to some technical problems'));
@@ -188,5 +188,5 @@ function tripal_apollo_registration_form_submit($form, &$form_state) {
 
   // Jump to home page rather than back to web apollo registration page to avoid
   // contradictory messages if flood control has been activated.
-  $form_state['redirect'] = '';
+  $form_state['redirect'] = variable_get('site_frontpage');
 }

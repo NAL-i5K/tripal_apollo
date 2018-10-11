@@ -1,12 +1,11 @@
 <?php
 
 
-
-function tripal_apollo_approve_user_request_form($form, &$form_state, $uid){
+function tripal_apollo_approve_user_request_form($form, &$form_state, $uid) {
 
   $header = [];
 
-//note: UID is not user id.  uid is the webapollo_users.id
+  //note: UID is not user id.  uid is the webapollo_users.id
   $data = db_select('webapollo_users', 'w')
     ->fields('w', ['uid', 'name', 'pass', 'email', 'organisms', 'status'])
     ->condition('w.uid', $uid, '=')
@@ -42,6 +41,20 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $uid){
   $form['web_apollo_table']['organism'] = [
     '#type' => 'value',
     '#value' => $organism_value,
+  ];
+
+  //Look up instance for this organism
+
+  $query = db_select('apollo_instance_organism', 'aio');
+  $query->join('apollo_instance', 'ai', 'ai.id  = aio.instance_id');
+  $query->addField('ai', 'name');
+  $query->condition('aio.organism_id', $organism_object->organism_id);
+  $instance_name = $query->execute()
+    ->fetchField();
+
+  $form['web_apollo_table']['instance'] = [
+    '#type' => 'value',
+    '#value' => $instance_name,
   ];
 
   $status = '';
@@ -92,7 +105,7 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $uid){
  * @sends an email to user regarding login credentials to the web apollo site.
  */
 
-function tripal_apollo_approve_user_request_form_submit($form, &$form_state){
+function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
   $values = $form_state['values']['web_apollo_table'];
   $values['type'] = 1;
   $status = $form_state['values']['web_apollo_table']['status'];//reject or approve
@@ -112,8 +125,8 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state){
     //todo:  Figure out what these correspond to so we can store in our node.
 
     $db_name = "Get this from our node";
-    $db_user = "what do we do here";
-    $db_pass = "what do we do here";
+    $db_user = "Get this from our node";
+    $db_pass = "Get this from our node";
 
     /****
      * The goal is to make the password same for all organism for same emailid.
@@ -178,16 +191,18 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state){
     //TODO:  also pass in admin information here.
 
     $python_path = "/usr/local/bin/python2.7";
-    $script_path  = drupal_get_path('module', 'tripal_apollo') . '/bin/adduser.py';
+    $script_path = drupal_get_path('module', 'tripal_apollo') . '/bin/adduser.py';
     $host = "apollo.nal.usda.gov";
 
     //TODO:  drupal best practices running scripts?
     //TODO: get python path via admin setting.
 
-    $exec_user = exec( $python_path . " " . $script_path . " -dbuser " . $db_user . " -dbname " . $db_name . " -user " . $user . " -pwd " . $pass . " -host " . $host);
+    $exec_user = exec($python_path . " " . $script_path . " -dbuser " . $db_user . " -dbname " . $db_name . " -user " . $user . " -pwd " . $pass . " -host " . $host);
 
 
     //TODO:  sounds like apollo 1 support feature-level permissions.  How do we suppor this?
+
+    // if apollo 1, do something
 
     //Only on prod we have data for species seqids.txt files, but not on dev. change the seqids.txt file while testing on gmod-dev server
     /*($organism_short_name == 'diacit')
@@ -212,22 +227,22 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state){
       ->fields(['status' => $status])
         ->condition('uid', $uid, '=')
         ->execute();
-      drupal_set_message(t('Successfully an email was sent to %email regarding the status approved.'), ['%email' => $values['email']], $type = 'status');
+      drupal_set_message(t('Successfully an email was sent to %email regarding the status approved.', ['%email' => $values['email']]), $type = 'status');
     }
 
     //Displaying status message on the site
     $status = ($status == 1) ? 'Approved' : 'Rejected';
-    drupal_set_message(t("%name 's status was changed to %status"), [
+    drupal_set_message(t("%name 's status was changed to %status", [
       '%name' => $form_state['values']['web_apollo_table']['name'],
       '%status' => $status,
-    ], $type = 'status');
+    ]), $type = 'status');
   } // Status approved condition ends here
   elseif ($status == 0) {
     db_update('webapollo_users')// Table name no longer needs {}
     ->fields(['status' => $status])
       ->condition('uid', $uid, '=')
       ->execute();
-    drupal_set_message(t('%name has been rejected by the admin due to some reasons.'), ['%name' => $values['name']], $type = 'status');
+    drupal_set_message(t('The apollo request for %name has been successfuly rejected.', ['%name' => $values['name']]), $type = 'status');
   }
   /**********************************************/
 

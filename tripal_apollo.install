@@ -13,11 +13,15 @@ function tripal_apollo_schema() {
   $schema['apollo_instance'] = [
     'description' => "Apollo instance table.  Each instance is a specific Apollo server.",
     'fields' => [
-      'nid' => [
-        'description' => t('The primary identifier for a node.'),
+      'id' => [
+        'description' => t('Apollo Instance ID'),
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
+      ],
+      'nid' => [
+        'description' => t('The primary identifier for a node.'),
+        'type' => 'int',
       ],
       'url' => [
         'not null' => TRUE,
@@ -50,7 +54,7 @@ function tripal_apollo_schema() {
       'name' => ['name'],
       'nid' => ['nid'],
     ],
-    'primary key' => ['nid'],
+    'primary key' => ['id'],
   ];
 
   $schema = tripal_apollo_add_instance_user_organism_schemas($schema);
@@ -119,7 +123,7 @@ function tripal_apollo_schema() {
         'not null' => TRUE,
         'default' => 2,
         'size' => 'tiny',
-        'description' => 'Whether the user is active(1) or blocked(0).',
+        'description' => 'Whether the user is active(1/2) or blocked(0).  ALSO if this instance is an apollo 1 (1) or apollo 2 (2) instance.',
       ],
     ],
     'unique keys' => [
@@ -189,7 +193,7 @@ function tripal_apollo_add_instance_user_organism_schemas($schema) {
       ],
     ],
     'unique keys' => [
-      'instance organism' => ['instance_id', 'organism_id'],
+      'apollo_instance_organism_uq1' => ['instance_id'],
     ],
     'primary key' => ['id'],
   ];
