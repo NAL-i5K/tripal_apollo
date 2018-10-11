@@ -66,10 +66,7 @@ function tripal_apollo_menu() {
     'file' => 'includes/tripal_apollo_registration.form.inc',
   ];
 
-  /**
-   * Below will be for both Apollo 1 and Apollo 2.
-   * (previously separate tabs)
-   */
+
   $items['admin/tripal/apollo/users'] = [
     'title' => 'Apollo User Administration',
     'description' => 'List of Apollo user requests to approve/reject',

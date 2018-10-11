@@ -10,6 +10,8 @@ function tripal_apollo_mail($key, &$message, $params) {
 
   $organism_value = "";
 
+  //web_apollo_webapollo_user_approve_email sends organism and organism_key params.  key is the organism_id, organism is the full name.
+
   if (is_array($params['organism'])) {
     $num_of_organism = count($params['organism']);
     $i = 1;
@@ -21,6 +23,11 @@ function tripal_apollo_mail($key, &$message, $params) {
     }
     $organism_value = rtrim($organism_value, ", ");
   }
+  else {
+
+    $organism_value = $params['organism'];
+  }
+
   $variables = [
     '!organism' => $organism_value,
     '!user' => $params['name'],
