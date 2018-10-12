@@ -90,7 +90,7 @@ function apollo_instance_form($node, &$form_state) {
   ];
 
 
-  $table_choices = ['organism' => 'Organism', 'Analysis' => 'Analysis', 'project '=> 'Project'];
+  $table_choices = ['organism' => 'Organism', 'analysis' => 'Analysis', 'project '=> 'Project'];
 
   $form['core']['base_table'] = [
     '#type' => 'select',
@@ -172,8 +172,6 @@ function apollo_instance_insert($node) {
 
   $password = drupal_hash_base64($node->admin_password);
 
-  dpm($node);
-
   db_insert('apollo_instance')->fields([
     'nid' => $node->nid,
     'name' => $node->instance_name,
@@ -181,6 +179,7 @@ function apollo_instance_insert($node) {
     'apollo_version' => $node->apollo_version,
     'admin_name' => $node->admin_name,
     'admin_password' => $password,
+    'base_table' => $node->base_table
   ])->execute();
 
 }
@@ -198,6 +197,7 @@ function apollo_instance_update($node) {
     'url' => $node->url,
     'apollo_version' => $node->apollo_version,
     'admin_name' => $node->admin_name,
+    'base_table' => $node->base_table
   ];
 
 
@@ -239,7 +239,7 @@ function apollo_instance_load($nodes) {
     $nodes[$record->nid]->instance_name = $record->name;
     $nodes[$record->nid]->url = $record->url;
     $nodes[$record->nid]->apollo_version = $record->apollo_version;
-
+    $nodes[$record->nid]->base_table = $record->base_table;
   }
 
   return $nodes;
@@ -250,7 +250,7 @@ function apollo_instance_load($nodes) {
  * This function acts on ALL NODES
  */
 function tripal_apollo_node_insert($node) {
-  if ($node->type == 'web_apollo') {
+  if ($node->type == 'apollo_instance') {
     $node->title = $node->instance_name;
   }
 }
@@ -260,7 +260,7 @@ function tripal_apollo_node_insert($node) {
  * This function acts on ALL NODES
  */
 function tripal_apollo_node_update($node) {
-  if ($node->type == 'web_apollo') {
+  if ($node->type == 'apollo_instance') {
     $node->title = $node->instance_name;
   }
 }

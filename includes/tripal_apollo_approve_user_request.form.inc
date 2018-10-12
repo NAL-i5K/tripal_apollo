@@ -44,11 +44,12 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $uid) {
   ];
 
   //Look up instance for this organism
+  //TODO: support non-organism base tables.
 
-  $query = db_select('apollo_instance_organism', 'aio');
+  $query = db_select('apollo_instance_record', 'aio');
   $query->join('apollo_instance', 'ai', 'ai.id  = aio.instance_id');
   $query->addField('ai', 'name');
-  $query->condition('aio.organism_id', $organism_object->organism_id);
+  $query->condition('aio.record_id', $organism_object->organism_id);
   $instance_name = $query->execute()
     ->fetchField();
 
