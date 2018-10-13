@@ -209,8 +209,6 @@ function apollo_instance_insert($node) {
 
   //associate records with this instance.  Clear a pre-exisiting record then insert.
 
-  $base_key = $node->base_table . '_id';
-
   foreach ($node->records as $record) {
     db_delete('apollo_instance_record')
       ->condition('base_table', $node->base_table)
@@ -251,15 +249,24 @@ function apollo_instance_update($node) {
     $password = drupal_hash_base64($node->admin_password);
     $fields['admin_password'] = $password;
   }
-  db_insert('apollo_instance')->fields($fields)
+  $id = db_update('apollo_instance')->fields($fields)
     ->condition('nid', $node->nid)
     ->execute();
 
-  $base_key = $node->base_table . '_id';
-
   foreach ($node->records as $record) {
-    db_delete('apollo_instance_record')->condition($base_key, $record);
-    db_insert('apollo_instance_record')->fields([$base_key => $record]);
+
+    db_delete('apollo_instance_record')
+      ->condition('base_table', $node->base_table)
+      ->condition('record_id', $record)
+      ->execute();
+
+    db_insert('apollo_instance_record')
+      ->fields([
+        'instance_id' => $id,
+        'record_id' => $record,
+        'base_table' => $node->base_table,
+      ])
+      ->execute();
   }
 
 }
