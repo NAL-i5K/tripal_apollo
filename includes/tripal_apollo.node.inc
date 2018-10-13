@@ -90,7 +90,11 @@ function apollo_instance_form($node, &$form_state) {
   ];
 
 
-  $table_choices = ['organism' => 'Organism', 'analysis' => 'Analysis', 'project '=> 'Project'];
+  $table_choices = [
+    'organism' => 'Organism',
+    'analysis' => 'Analysis',
+    'project ' => 'Project',
+  ];
 
   $form['core']['base_table'] = [
     '#type' => 'select',
@@ -98,6 +102,10 @@ function apollo_instance_form($node, &$form_state) {
     '#title' => t("Chado Base Table"),
     '#description' => 'Each record can only be associated with one instance.  We suggest associating instances with organisms.  However, if you would like to support different assemblies for the same organism, you can use the chado project or analysis table instead.',
     '#default_value' => isset($node->base_table) ? $node->base_table : 'organism',
+    '#ajax' => [
+      'callback' => 'tripal_apollo_record_callback',
+      'wrapper' => 'tripal_apollo_record_wrapper',
+    ],
   ];
 
   $select = [1 => 'Apollo 1', 2 => 'Apollo 2'];
@@ -108,7 +116,7 @@ function apollo_instance_form($node, &$form_state) {
     '#required' => TRUE,
     '#empty_option' => 'Select an Apollo version',
     '#options' => $select,
-    '#default_value' => isset($node->apollo_version) ? $node->apollo_version : null,
+    '#default_value' => isset($node->apollo_version) ? $node->apollo_version : NULL,
   ];
 
 
@@ -116,14 +124,31 @@ function apollo_instance_form($node, &$form_state) {
     '#type' => 'textfield',
     '#title' => t("Admin name"),
     '#required' => TRUE,
-    '#default_value'=> isset($node->admin_name) ? $node->admin_name : ''
+    '#default_value' => isset($node->admin_name) ? $node->admin_name : '',
   ];
 
   $form['core']['admin_password'] = [
     '#type' => 'textfield',
     '#title' => t("Admin password"),
     '#required' => TRUE,
-    '#default_value'=> null
+    '#default_value' => NULL,
+  ];
+
+
+  $selected = isset($form_state['values']['base_table']) ? $form_state['values']['base_table'] : 'organism';
+
+
+  $record_list = tripal_apollo_build_record_select($selected);
+
+
+  $form['core']['records'] = [
+    '#type' => 'select',
+    '#title' => 'Associated Records',
+    '#multiple' => TRUE,
+    '#description' => 'Select which records are associated with this instance.  A record can only be associated with one instance: setting this instance will overwrite others.',
+    '#prefix' => '<div id="tripal_apollo_record_wrapper">',
+    '#suffix' => '</div>',
+    '#options' => $record_list,
   ];
 
   return $form;
@@ -147,7 +172,7 @@ function apollo_instance_form_validate($form, $form_state) {
     ->execute()
     ->fetchObject();
 
-  if ($result){
+  if ($result) {
     form_set_error('core[instance_name]', t('An instance with that name already exists.  Please supply a unique name.'));
   }
   $result = db_select('public.apollo_instance', 't')
@@ -156,7 +181,7 @@ function apollo_instance_form_validate($form, $form_state) {
     ->execute()
     ->fetchObject();
 
-  if ($result){
+  if ($result) {
     form_set_error('core[instance_name]', t('An instance with that URL already exists.  Please supply a unique URL.'));
   }
 
@@ -172,15 +197,34 @@ function apollo_instance_insert($node) {
 
   $password = drupal_hash_base64($node->admin_password);
 
-  db_insert('apollo_instance')->fields([
+  $id = db_insert('apollo_instance')->fields([
     'nid' => $node->nid,
     'name' => $node->instance_name,
     'url' => $node->url,
     'apollo_version' => $node->apollo_version,
     'admin_name' => $node->admin_name,
     'admin_password' => $password,
-    'base_table' => $node->base_table
+    'base_table' => $node->base_table,
   ])->execute();
+
+  //associate records with this instance.  Clear a pre-exisiting record then insert.
+
+  foreach ($node->records as $record) {
+    db_delete('apollo_instance_record')
+      ->condition('base_table', $node->base_table)
+      ->condition('record_id', $record)
+      ->execute();
+
+    $result = db_insert('apollo_instance_record')
+      ->fields([
+        'instance_id' => $id,
+        'record_id' => $record,
+        'base_table' => $node->base_table,
+      ])
+      ->execute();
+
+
+  }
 
 }
 
@@ -197,7 +241,7 @@ function apollo_instance_update($node) {
     'url' => $node->url,
     'apollo_version' => $node->apollo_version,
     'admin_name' => $node->admin_name,
-    'base_table' => $node->base_table
+    'base_table' => $node->base_table,
   ];
 
 
@@ -205,9 +249,25 @@ function apollo_instance_update($node) {
     $password = drupal_hash_base64($node->admin_password);
     $fields['admin_password'] = $password;
   }
-  db_insert('apollo_instance')->fields($fields)
+  $id = db_update('apollo_instance')->fields($fields)
     ->condition('nid', $node->nid)
     ->execute();
+
+  foreach ($node->records as $record) {
+
+    db_delete('apollo_instance_record')
+      ->condition('base_table', $node->base_table)
+      ->condition('record_id', $record)
+      ->execute();
+
+    db_insert('apollo_instance_record')
+      ->fields([
+        'instance_id' => $id,
+        'record_id' => $record,
+        'base_table' => $node->base_table,
+      ])
+      ->execute();
+  }
 
 }
 
@@ -265,6 +325,63 @@ function tripal_apollo_node_update($node) {
   }
 }
 
+function tripal_apollo_record_callback($form, &$form_state) {
+  return $form['core']['records'];
+}
 
 
+/**
+ *
+ * Build select options for all records of a given table.
+ *
+ * @param $base_table | expects organism, analysis, or project
+ *
+ * @return array | select option array of key -> label
+ */
+function tripal_apollo_build_record_select($base_table) {
 
+  $table_key = $base_table . '_id';
+  $select = [];
+
+  $fields = [$table_key];
+
+  switch ($base_table) {
+    case 'organism':
+      $fields[] = 'genus';
+      $fields[] = 'species';
+      break;
+    case 'project':
+      $fields[] = 'name';
+      break;
+    case 'analysis':
+      $fields[] = 'name';
+      break;
+  }
+
+
+  $query = db_select('chado.' . $base_table, 't')
+    ->fields('t', $fields);
+
+  $results = $query->execute()
+    ->fetchAll();
+
+  foreach ($results as $result) {
+    $string = '';
+    switch ($base_table) {
+      case 'organism':
+        $string = $result->genus . ' ' . $result->species;
+        break;
+      case 'project':
+        $string = $result->name;
+        break;
+      case 'analysis':
+        $string = $result->name;
+        break;
+    }
+
+    $select[$result->$table_key] = $string;
+
+  }
+
+  return $select;
+}
