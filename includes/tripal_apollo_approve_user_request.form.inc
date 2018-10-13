@@ -1,15 +1,23 @@
 <?php
 
 
-function tripal_apollo_approve_user_request_form($form, &$form_state, $uid) {
+/**
+ * @param $form
+ * @param $form_state
+ *
+ * @return mixed
+ */
+function tripal_apollo_approve_user_request_form($form, &$form_state, $submission_id) {
 
   $header = [];
 
   //note: UID is not user id.  uid is the webapollo_users.id
   $data = db_select('webapollo_users', 'w')
     ->fields('w', ['uid', 'name', 'pass', 'email', 'organisms', 'status'])
-    ->condition('w.uid', $uid, '=')
+    ->condition('w.uid', $submission_id, '=')
     ->execute()->fetchObject();
+
+  //TODO: on schema update, include the base table.
 
   $form['web_apollo_table'] = [
     '#tree' => TRUE, // Need this for easy submit processing
@@ -21,6 +29,7 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $uid) {
     '#title' => t('Name'),
     '#value' => $data->name,
   ];
+
   $form['web_apollo_table']['email'] = [
     '#type' => 'value',
     '#value' => $data->email,
@@ -29,6 +38,7 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $uid) {
 
   //it says organisms here but in reality it will be only a single organism since we retrieved one record only.
 
+  //todo: genercize to be any content type.
   $organism_object = chado_get_organism(['organism_id' => $data->organisms]);
 
   $organism_value = $organism_object->abbreviation . ' (' . $organism_object->common_name . ')';
@@ -46,12 +56,23 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $uid) {
   //Look up instance for this organism
   //TODO: support non-organism base tables.
 
+
+
   $query = db_select('apollo_instance_record', 'aio');
   $query->join('apollo_instance', 'ai', 'ai.id  = aio.instance_id');
-  $query->addField('ai', 'name');
+  $query->fields('ai', ['name', 'id']);
   $query->condition('aio.record_id', $organism_object->organism_id);
-  $instance_name = $query->execute()
-    ->fetchField();
+  $result  = $query->execute()
+    ->fetchObject();
+
+  $instance_name = $result->name;
+  $instance_id = $result->id;
+
+
+  $form['web_apollo_table']['instance_id'] = [
+    '#type' => 'value',
+    '#value' => $instance_id,
+  ];
 
   $form['web_apollo_table']['instance'] = [
     '#type' => 'value',
@@ -111,6 +132,7 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
   $values['type'] = 1;
   $status = $form_state['values']['web_apollo_table']['status'];//reject or approve
   $uid = $form_state['values']['web_apollo_table']['uid'];
+  //TODO: not actually uid.  this is the submission id
   $to = $values['email'];
   $from = variable_get('site_mail');
   $status_res = db_select('webapollo_users', 'w')
@@ -118,22 +140,34 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
     ->condition('w.uid', $uid, '=')
     ->execute()->fetchField();
 
-  if (($status_res != $status) && ($status == 1)) {
-    /***************web apollo automated login credentials*******************************/
+  $instance_id = $form_state['values']['instance_id'];
+  $record_id = $values['organism_key'];
 
-    //First: Look up this organism in the site's apollo instance
+  $query = db_select('apollo_instance_record', 'air')
+    ->condition('air.record_id', $record_id);
+  $query->join('apollo_instance', 'ai', 'ai.id = air.instance_id');
+  $query->fields('ai');
 
-    //todo:  Figure out what these correspond to so we can store in our node.
+  //one record = one instance, so only 1 result
+  $instance_info = $query->execute()->fetchObject();
 
-    $db_name = "Get this from our node";
-    $db_user = "Get this from our node";
-    $db_pass = "Get this from our node";
+  if (($status_res != $status) && ($status == 1)) {//User is approved.
+
+
+    $host = $instance_info->url;
+    $db_name = $instance_info->db_name;
+    $db_user = $instance_info->db_user_name;
+    //TODO:  why doesnt it need the db password?
+
+    $db_pass = $instance_info->db_password;
 
     /****
      * The goal is to make the password same for all organism for same emailid.
      * First check for the email already registered for any organism with status=1, if yes then take the most recent password and update in webapollo_users and apollo tables.
      * IF not then check for email with status=2, then take most recent password and update in webapollo_uses and apollo tables.
      */
+
+    //TODO:  we will replace this with the new schema.
     $email = $to;
     $check_email_status1_exists = db_select('webapollo_users', 'w')
       ->fields('w', ['uid', 'name', 'pass', 'organisms'])
@@ -181,19 +215,9 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
       $values['pass'] = $pass;
     }
 
-    $user_pass_values['organism'] = "What should this be? Why organism level password?  One organism corresponds to one record in webapollo_users.";
-    //$user_pass_values['organism'] = isset($values['organism_key']) ? $organism_data[$values['organism_key']] : '';
-
-    //TODO: isnt this being set in the opposite manner?  we use user and pass below....
-
-    $user_pass_values['user'] = $user;
-    $user_pass_values['pass'] = $pass;
-
-    //TODO:  also pass in admin information here.
-
-    $python_path = "/usr/local/bin/python2.7";
+    //TODO: get this from sitewide variable in admin area
+    $python_path = variable_get('tripal_apollo_python_path');
     $script_path = drupal_get_path('module', 'tripal_apollo') . '/bin/adduser.py';
-    $host = "apollo.nal.usda.gov";
 
     //TODO:  drupal best practices running scripts?
     //TODO: get python path via admin setting.
@@ -238,15 +262,14 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
       '%status' => $status,
     ]), $type = 'status');
   } // Status approved condition ends here
+
   elseif ($status == 0) {
-    db_update('webapollo_users')// Table name no longer needs {}
+    db_update('webapollo_users')
     ->fields(['status' => $status])
       ->condition('uid', $uid, '=')
       ->execute();
     drupal_set_message(t('The apollo request for %name has been successfuly rejected.', ['%name' => $values['name']]), $type = 'status');
   }
-  /**********************************************/
-
   $form_state['redirect'] = 'admin/tripal/apollo/users';
   return;
 }

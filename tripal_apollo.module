@@ -86,6 +86,15 @@ function tripal_apollo_menu() {
     'file' => 'includes/tripal_apollo_approve_user_request.form.inc',
   ];
 
+  $items['admin/tripal/apollo/settings'] = [
+    'title' => 'Tripal Apollo Settings',
+    'description' => 'Configure sitewide Apollo settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['tripal_apollo_admin_form'],
+    'access arguments' => ['administer web-apollo'],
+    'file' => 'includes/tripal_apollo_admin_form.inc',
+  ];
+
 
   /***
    *

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Builds the user requet table for admin to approve/reject.
+ * Builds the user request table for admin to approve/reject.
  * Implements hook_form().
  */
 function tripal_apollo_admin_form($form, &$form_state) {
