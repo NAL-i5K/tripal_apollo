@@ -66,8 +66,8 @@ function tripal_apollo_node_access($node, $op, $account) {
  * Node creation form for apollo server.
  */
 function apollo_instance_form($node, &$form_state) {
-  $form = [];
 
+  $form = [];
   $form['#validate'] = ['apollo_instance_form_validate'];
   $form['core'] = [
     '#type' => 'fieldset',
@@ -78,14 +78,14 @@ function apollo_instance_form($node, &$form_state) {
     '#type' => 'textfield',
     '#title' => t("Human-readable Name"),
     '#required' => TRUE,
-    '#default_value' => isset($node->instance_name) ? $node->instance_name : '',
+    '#default_value' => property_exists($node, 'instance_name') ? $node->instance_name : '',
   ];
 
   $form['core']['url'] = [
     '#type' => 'textfield',
     '#title' => t("URL of Apollo Server"),
     '#required' => TRUE,
-    '#default_value' => isset($node->url) ? $node->url : '',
+    '#default_value' => property_exists($node, 'url') ? $node->url : '',
 
   ];
 
@@ -101,7 +101,7 @@ function apollo_instance_form($node, &$form_state) {
     '#options' => $table_choices,
     '#title' => t("Chado Base Table"),
     '#description' => 'Each record can only be associated with one instance.  We suggest associating instances with organisms.  However, if you would like to support different assemblies for the same organism, you can use the chado project or analysis table instead.',
-    '#default_value' => isset($node->base_table) ? $node->base_table : 'organism',
+    '#default_value' => property_exists($node, 'base_table') ? $node->base_table : 'organism',
     '#ajax' => [
       'callback' => 'tripal_apollo_record_callback',
       'wrapper' => 'tripal_apollo_record_wrapper',
@@ -116,7 +116,7 @@ function apollo_instance_form($node, &$form_state) {
     '#required' => TRUE,
     '#empty_option' => 'Select an Apollo version',
     '#options' => $select,
-    '#default_value' => isset($node->apollo_version) ? $node->apollo_version : NULL,
+    '#default_value' => property_exists($node, 'apollo_version') ? $node->apollo_version : NULL,
   ];
 
 
@@ -124,7 +124,7 @@ function apollo_instance_form($node, &$form_state) {
     '#type' => 'textfield',
     '#title' => t("Admin name"),
     '#required' => TRUE,
-    '#default_value' => isset($node->admin_name) ? $node->admin_name : '',
+    '#default_value' => property_exists($node, 'admin_name') ? $node->admin_name : '',
   ];
 
   $form['core']['admin_password'] = [
@@ -165,6 +165,11 @@ function apollo_instance_form_validate($form, $form_state) {
   $name = $values['instance_name'];
   $url = $values['url'];
 
+  $editing = isset($values['nid']) ? TRUE : FALSE;
+
+  if ($editing) {//TODO: we should check if we have changed the name/url but for now we will just return.
+    return;
+  }
 
   $result = db_select('public.apollo_instance', 't')
     ->fields('t')
@@ -287,7 +292,6 @@ function apollo_instance_delete($node) {
  * @param $node
  */
 function apollo_instance_load($nodes) {
-
   $sql = "
     SELECT *
     FROM {apollo_instance}
@@ -300,6 +304,7 @@ function apollo_instance_load($nodes) {
     $nodes[$record->nid]->url = $record->url;
     $nodes[$record->nid]->apollo_version = $record->apollo_version;
     $nodes[$record->nid]->base_table = $record->base_table;
+    $nodes[$record->nid]->title = $record->name;
   }
 
   return $nodes;
@@ -312,6 +317,8 @@ function apollo_instance_load($nodes) {
 function tripal_apollo_node_insert($node) {
   if ($node->type == 'apollo_instance') {
     $node->title = $node->instance_name;
+
+    dpm($node);
   }
 }
 
