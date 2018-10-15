@@ -48,24 +48,24 @@ function tripal_apollo_schema() {
         'description' => 'Descriptive name for the instance.',
       ],
       'database_name' => [
-        'not null' => TRUE,
+        'not null' => FALSE,
         'type' => 'varchar',
         'length' => 64,
-        'description' => 'Database name on the Apollo instance.',
+        'description' => 'Database name on the Apollo instance.  Only required for Apollo 1.',
 
       ],
       'admin_name' => [
         'not null' => TRUE,
         'type' => 'varchar',
         'length' => 64,
-        'description' => 'Database admin username on the Apollo instance.',
+        'description' => 'Admin username on the Apollo instance.  For Apollo 1 this is the db user name, for Apollo 2 it is the apollo username.',
 
       ],
       'admin_password' => [
         'not null' => TRUE,
         'type' => 'varchar',
         'length' => 64,
-        'description' => "Database admin password on the Apollo instance",
+        'description' => "Admin password on the Apollo instance.  For Apollo 1 this is the db user password, for Apollo 2 it is the apollo user's password.",
       ],
       'apollo_version' => [
         'type' => 'int',

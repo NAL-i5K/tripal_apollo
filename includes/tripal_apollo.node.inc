@@ -112,14 +112,15 @@ function apollo_instance_form($node, &$form_state) {
   $form['core']['database_name'] = [
     '#type' => 'textfield',
     '#title' => t("Database Name"),
-    '#description' => t("The name of the database on the Chado instance."),
-    '#required' => TRUE,
+    '#description' => t("The name of the database on the Chado instance.  Only required for Apollo 1."),
+    '#required' => FALSE,
     '#default_value' => property_exists($node, 'database_name') ? $node->database_name : '',
   ];
 
   $form['core']['admin_name'] = [
     '#type' => 'textfield',
-    '#title' => t("Database Admin Username"),
+    '#title' => t("Admin Username"),
+    '#description' => t('For Apollo 1 this is the DATABASE admin username.  For Apollo 2, it is the Apollo admin user account name.'),
     '#required' => TRUE,
     '#default_value' => property_exists($node, 'admin_name') ? $node->admin_name : '',
   ];
@@ -129,6 +130,7 @@ function apollo_instance_form($node, &$form_state) {
     '#title' => t("Database admin password"),
     '#required' => TRUE,
     '#default_value' => NULL,
+    '#description' => 'For Apollo 1 this is the DATABASE admin username.  For Apollo 2, it is the Apollo admin user account name.',
   ];
 
 
@@ -156,6 +158,16 @@ function apollo_instance_form_validate($form, $form_state) {
   $values = $form_state['values'];
   $name = $values['instance_name'];
   $url = $values['url'];
+
+
+  $version = $values['apollo_version'];
+  if ($version === 1) {
+    $db_name = $values['database_name'];
+
+    if (!$db_name) {
+      form_set_error('core[database_name]', t('You are creating an Apollo 1 instance. Apollo 1 uses the database connection, and therefore requires the database name.'));
+    }
+  }
 
   $editing = isset($values['nid']) ? TRUE : FALSE;
 
@@ -193,7 +205,7 @@ function apollo_instance_form_validate($form, $form_state) {
 function apollo_instance_insert($node) {
 
 
-    $password = tripal_apollo_encrypt($node->admin_password);
+  $password = tripal_apollo_encrypt($node->admin_password);
 
 
   $id = db_insert('apollo_instance')->fields([

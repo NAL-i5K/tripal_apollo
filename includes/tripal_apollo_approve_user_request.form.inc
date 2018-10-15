@@ -141,8 +141,6 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
     ->condition('aur.id', $submission_id)
     ->execute()->fetchField();
 
-  //$instance_id = $form_state['values']['instance_id'];
-
   $record_id = $values['organism_key'];
 
   $query = db_select('apollo_instance_record', 'air')
@@ -155,48 +153,8 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
 
   if (($status_res != $status) && ($status == 1)) {//User is approved.
 
-    $host = $instance_info->url;
-    $db_name = $instance_info->database_name;
-    $db_user = $instance_info->admin_name;
-
-    $db_pass = decrypt($instance_info->admin_password);
-
-    $email = $to;
-
-    $user = $values['email']; //Note: same as $to and $email.
-    $values['pass'] = decrypt($values['pass']);
-    //decrypt so we can email to user and 
-    $user_pass = $values['pass'];
-
-    $python_path = variable_get('tripal_apollo_python_path');
-    $script_path = drupal_get_path('module', 'tripal_apollo') . '/bin/adduser.py';
-
-    //TODO:  drupal best practices running scripts?
-    //TODO: get python path via admin setting.
-
-    $exec_user = exec($python_path . " " . $script_path . " -dbuser " . $db_user .
-      " -dbname " . $db_name .
-      "-dbpass " . $db_pass .
-      " -user " . $user .
-      " -pwd " . $user_pass .
-      " -host " . $host);
-
-
-    //TODO:  sounds like apollo 1 support feature-level permissions.  How do we suppor this?
-
-    // if apollo 1, do something
-
-    //Only on prod we have data for species seqids.txt files, but not on dev. change the seqids.txt file while testing on gmod-dev server
-    /*($organism_short_name == 'diacit')
-      $seqids = '/app/data/other_species/'.$organism_short_name.'/seqids/seqids.txt';
-    else
-      $seqids = '/app/data/BCM_i5k_pilot/'.$organism_short_name.'/seqids/seqids.txt';
-
-    $set_permissions =  shell_exec("perl set_track_permissions.pl -D ".$db_name." -U ".$db_user." -P ".$db_pass." -u ".$user." -t ".$seqids." -rw");
-    */
-
-    //DEVELOPMENT
-    // $set_permissions =  shell_exec("perl set_track_permissions.pl -D ".$db_name." -U ".$db_user." -P ".$db_pass." -u ".$user." -t trackseq.txt -rw");
+    //execute python scripts
+    tripal_apollo_create_user_permissions($values, $instance_info);
 
     //Send email to the user about the login credentials to the web apollo site
     $user_email_sent = drupal_mail('web_apollo', 'webapollo_user_approve_email', $to, language_default(), $values, $from, TRUE);
