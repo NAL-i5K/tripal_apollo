@@ -126,7 +126,21 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   $name = explode(" ", $values['name'], 2);
   $fname = $name[0];
   $lname = $name[1];
-  $group_base = "some_group";
+
+  //For now we assume the group base is genus_species
+  //see @ticket 41
+  $record = $values['organism_key'];
+  $base = variable_get('tripal_apollo_base_table');
+
+  if ($base == 'organism') {
+    $organism = chado_get_organism($base);
+    $group_base = $organism->genus . '_' . $organism->species;
+
+  }
+  else {//todo: how would one want analysis or project supported?
+    $group_base = "some base";
+  }
+
 
   $user_pass = tripal_apollo_apollo_decrypt($values['pass']);
 
@@ -135,6 +149,7 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   $script_path = drupal_get_path('module', 'tripal_apollo') . '/bin/';
 
   if ($instance_info->apollo_version === 1) {
+    //TODO: NOT SUPPORTED YET
     //Apollo 1 registration
 
     $script_path .= 'adduser.py';
@@ -186,7 +201,6 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
       " -group " . $group_base . "_WRITE");
     //Parameters not supplied:
     //metadata, token
-
   }
 
 
