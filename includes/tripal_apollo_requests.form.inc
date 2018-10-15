@@ -1,12 +1,11 @@
 <?php
 
 /**
- * Builds the user requet table for admin to approve/reject.
+ * Builds the user request table for admin to approve/reject.
  * Implements hook_form().
  */
-function tripal_apollo_admin_form($form, &$form_state) {
-  //TODO: this should be its own form.  After that,ideally, a site should use default drupal users and permissions instead.
-  $user_info = webapollo_register_users();
+function tripal_apollo_requests_form($form, &$form_state) {
+  $user_info = tripal_apollo_user_table();
 
   $form['users'] = ['#markup' => $user_info];
 
@@ -18,7 +17,7 @@ function tripal_apollo_admin_form($form, &$form_state) {
  * List the web apollo registered users with pagination and
  * with Approve/Reject options
  **/
-function webapollo_register_users() {
+function tripal_apollo_user_table() {
   $output = "";
 
   if (isset($_GET['sort']) && isset($_GET['order'])) {
@@ -123,7 +122,6 @@ function webapollo_register_users() {
         // The message to be displayed if table is empty
       ]
     ) . theme("pager");
-
 
   return $output;
 }

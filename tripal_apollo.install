@@ -5,6 +5,15 @@
  * Install, update and uninstall functions for the node module.
  */
 
+
+/**
+ * Implements hook_install().
+ */
+function tripal_apollo_install() {
+  variable_set('tripal_apollo_python_path', "/usr/local/bin/python2.7");
+
+}
+
 /**
  * Implements hook_schema().
  */
@@ -33,12 +42,17 @@ function tripal_apollo_schema() {
         'length' => 64,
         'not null' => TRUE,
       ],
-      'admin_name' => [
+      'db_name' => [
         'not null' => TRUE,
         'type' => 'varchar',
         'length' => 64,
       ],
-      'admin_password' => [
+      'db_user_name' => [
+        'not null' => TRUE,
+        'type' => 'varchar',
+        'length' => 64,
+      ],
+      'db_password' => [
         'not null' => TRUE,
         'type' => 'varchar',
         'length' => 64,
@@ -51,8 +65,8 @@ function tripal_apollo_schema() {
       'base_table' => [
         'type' => 'varchar',
         'length' => 64,
-        'description' => 'The chado base table this instance is associated with.  It could be organism, project, or analysis.'
-      ]
+        'description' => 'The chado base table this instance is associated with.  It could be organism, project, or analysis.',
+      ],
     ],
     'unique keys' => [
       'URL' => ['URL'],
@@ -147,6 +161,8 @@ function tripal_apollo_uninstall() {
   // Remove records from variable table.
   variable_del('web_apollo_organism');
   variable_del('web_apollo_recipients');
+  variable_del('tripal_apollo_python_path');
+
 
   /**
    * Remove all Apollo nodes
@@ -171,7 +187,9 @@ function tripal_apollo_uninstall() {
       node_revision_delete($nr->vid);
     }
     node_delete($node->nid);
+
   }
+
 }
 
 
@@ -199,8 +217,8 @@ function tripal_apollo_add_instance_user_organism_schemas($schema) {
       'base_table' => [
         'type' => 'varchar',
         'length' => 64,
-        'description' => 'The base table for the record.'
-      ]
+        'description' => 'The base table for the record.',
+      ],
     ],
     'unique keys' => [
       'apollo_instance_record_uq1' => ['record_id'],
