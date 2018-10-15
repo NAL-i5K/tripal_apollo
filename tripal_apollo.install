@@ -71,11 +71,6 @@ function tripal_apollo_schema() {
         'size' => 'small'
         //1 or 2
       ],
-      'base_table' => [
-        'type' => 'varchar',
-        'length' => 64,
-        'description' => 'The chado base table this instance is associated with.  It could be organism, project, or analysis.',
-      ],
     ],
     'unique keys' => [
       'URL' => ['URL'],
@@ -229,12 +224,6 @@ function tripal_apollo_add_instance_user_organism_schemas($schema) {
         'type' => 'int',
         'not null' => TRUE,
         'description' => "Chado primary record ID for the corresponding instance base table.",
-      ],
-      //TODO:  move to site variable.
-      'base_table' => [
-        'type' => 'varchar',
-        'length' => 64,
-        'description' => 'The base table for the record.',
       ],
     ],
     'unique keys' => [
