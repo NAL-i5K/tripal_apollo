@@ -39,7 +39,6 @@ if args.pwd:
     pwd = args.pwd
 perm = args.perm # read=1, write=2, publish=4, admin=8; ex. read+write = 1+2 = 3; system admin = 1+2+4+8 = 15
 
-# connect to apollo server with dbname 'cercap_users' and username 'postgres'
 conn = psycopg2.connect('dbname=' + dbname + ' user=' + dbuser + ' host=' + host)
 cur = conn.cursor()
 
