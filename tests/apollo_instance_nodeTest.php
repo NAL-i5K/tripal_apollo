@@ -39,6 +39,7 @@ class apollo_instance_nodeTest extends TripalTestCase {
   }
 
   private function configureApollo($url) {
+    variable_set('tripal_apollo_encrypt', FALSE);
 
     //First delete an existing instance since the url is unique.
     $check = db_select('apollo_instance', 't')

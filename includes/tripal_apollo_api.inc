@@ -75,3 +75,19 @@ function tripal_apollo_get_elligible_records() {
 
   return $out;
 }
+
+/**
+ * Helper function for using the encrypt module.  Since installing some of the prereq libraries can be a pain (particularly on OSX) we allow disabling it via variable.
+ *
+ * @param $string
+ *
+ * @return : encrypted string, or unencrypted string
+ */
+function tripal_apollo_encrypt($string){
+$encrypt = variable_get('tripal_apollo_encrypt');
+
+if ($encrypt){
+  $string = encrypt($string);
+}
+  return $string;
+}
