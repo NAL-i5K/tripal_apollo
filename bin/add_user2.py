@@ -13,6 +13,7 @@ Example Usage:
 parser.add_argument('-dbuser', help="Username used to connect database", required=True)
 parser.add_argument('-dbpass', help="Admin password used to connect database", required=True)
 #parser.add_argument('-dbname', help="Database name to be connected", required=True)
+#Needed for Apollo 1, not Apollo 2
 parser.add_argument('-host', help="Host IP of Apollo2 server ", required=True)
 parser.add_argument('-user', help="Username to be added", required=True)
 parser.add_argument('-fname', help="Firstname to be added", required=True)
@@ -28,7 +29,6 @@ parser.add_argument('-token', help="", required=False, default='ignore')
 
 args = parser.parse_args()
 
-#dbname = args.dbname
 dbuser = args.dbuser
 dbpass = args.dbpass
 host = args.host
