@@ -47,12 +47,10 @@ function tripal_apollo_registration_form($form, &$form_state) {
 
     if (!empty($associated_records)) {
       $message = 'You have already requested access to the following records:<ul>';
-
       foreach ($associated_records as $label) {
         $message .= '<li> ' . $label . '</li>';
       }
       $message .= '</ul>';
-
       $form['existing'] = [
         '#type' => 'markup',
         '#markup' => $message,
@@ -190,7 +188,6 @@ function tripal_apollo_registration_form_submit($form, &$form_state) {
         'email' => $email,
         'institution' => $values['institution'],
         'comment' => $values['comments'],
-        'create' => time(),
       ])
       ->execute();
   }
@@ -201,7 +198,9 @@ function tripal_apollo_registration_form_submit($form, &$form_state) {
 
       'record_id' => $record_id,
       'apollo_user_id' => $au_id,
-      'status' => 0 //pending request
+      'status' => 2,//pending request
+      'create' => time(),
+
     ]);
   }
 

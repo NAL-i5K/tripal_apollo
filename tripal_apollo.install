@@ -229,6 +229,7 @@ function tripal_apollo_add_instance_user_organism_schemas($schema) {
         'not null' => TRUE,
         'description' => "Chado primary record ID for the corresponding instance base table.",
       ],
+      //TODO:  move to site variable.
       'base_table' => [
         'type' => 'varchar',
         'length' => 64,
@@ -263,9 +264,15 @@ function tripal_apollo_add_instance_user_organism_schemas($schema) {
       'status' => [
         'type' => 'int',
         'not null' => TRUE,
-        'default' => 0,
+        'default' => 2,
         'size' => 'tiny',
-        'description' => "Request status.  0 = pending, 1 = approved, 2 = denied",
+        'description' => "Request status.  0 = rejected, 1 = approved, 2 = pending",
+      ],
+      'created' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Timestamp for when user was created.',
       ],
     ],
     'primary_key' => ['id'],
@@ -320,12 +327,6 @@ function tripal_apollo_add_instance_user_organism_schemas($schema) {
         'size' => 'big',
         'not null' => FALSE,
         'description' => 'The comment body.',
-      ],
-      'created' => [
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Timestamp for when user was created.',
       ],
     ],
     'primary key' => ['id'],
