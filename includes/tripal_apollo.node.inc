@@ -120,16 +120,24 @@ function apollo_instance_form($node, &$form_state) {
   ];
 
 
+  $form['core']['database_name'] = [
+    '#type' => 'textfield',
+    '#title' => t("Database Name"),
+    '#description' => t("The name of the database on the Chado instance."),
+    '#required' => TRUE,
+    '#default_value' => property_exists($node, 'database_name') ? $node->database_name : '',
+  ];
+
   $form['core']['admin_name'] = [
     '#type' => 'textfield',
-    '#title' => t("Admin name"),
+    '#title' => t("Database Admin Username"),
     '#required' => TRUE,
     '#default_value' => property_exists($node, 'admin_name') ? $node->admin_name : '',
   ];
 
   $form['core']['admin_password'] = [
     '#type' => 'textfield',
-    '#title' => t("Admin password"),
+    '#title' => t("Database admin password"),
     '#required' => TRUE,
     '#default_value' => NULL,
   ];
@@ -207,6 +215,7 @@ function apollo_instance_insert($node) {
     'name' => $node->instance_name,
     'url' => $node->url,
     'apollo_version' => $node->apollo_version,
+    'database_name' => $node->database_name,
     'admin_name' => $node->admin_name,
     'admin_password' => $password,
     'base_table' => $node->base_table,
@@ -245,6 +254,7 @@ function apollo_instance_update($node) {
     'name' => $node->instance_name,
     'url' => $node->url,
     'apollo_version' => $node->apollo_version,
+    'database_name' => $node->database_name,
     'admin_name' => $node->admin_name,
     'base_table' => $node->base_table,
   ];
@@ -301,6 +311,7 @@ function apollo_instance_load($nodes) {
   foreach ($result as $record) {
     // Add basic blast node information.
     $nodes[$record->nid]->instance_name = $record->name;
+    $nodes[$record->nid]->database_name = $record->database_name;
     $nodes[$record->nid]->url = $record->url;
     $nodes[$record->nid]->apollo_version = $record->apollo_version;
     $nodes[$record->nid]->base_table = $record->base_table;
