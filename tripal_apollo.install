@@ -41,21 +41,27 @@ function tripal_apollo_schema() {
         'type' => 'varchar',
         'length' => 64,
         'not null' => TRUE,
+        'description' => 'Descriptive name for the instance.'
       ],
-      'db_name' => [
+      'database_name' => [
         'not null' => TRUE,
         'type' => 'varchar',
         'length' => 64,
+        'description' => 'Database name on the Apollo instance.'
+
       ],
-      'db_user_name' => [
+      'admin_name' => [
         'not null' => TRUE,
         'type' => 'varchar',
         'length' => 64,
+        'description' => 'Database admin username on the Apollo instance.'
+
       ],
-      'db_password' => [
+      'admin_password' => [
         'not null' => TRUE,
         'type' => 'varchar',
         'length' => 64,
+        'description' => "Database admin password on the Apollo instance"
       ],
       'apollo_version' => [
         'type' => 'int',
@@ -193,6 +199,13 @@ function tripal_apollo_uninstall() {
 }
 
 
+/**
+ * Adds the apollo_instance_record and apollo_user schemas
+ *
+ * @param $schema
+ *
+ * @return mixed
+ */
 function tripal_apollo_add_instance_user_organism_schemas($schema) {
 
   $schema['apollo_instance_record'] = [

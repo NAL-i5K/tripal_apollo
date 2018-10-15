@@ -56,13 +56,11 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $submissio
   //Look up instance for this organism
   //TODO: support non-organism base tables.
 
-
-
   $query = db_select('apollo_instance_record', 'aio');
   $query->join('apollo_instance', 'ai', 'ai.id  = aio.instance_id');
   $query->fields('ai', ['name', 'id']);
   $query->condition('aio.record_id', $organism_object->organism_id);
-  $result  = $query->execute()
+  $result = $query->execute()
     ->fetchObject();
 
   $instance_name = $result->name;
@@ -155,11 +153,11 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
 
 
     $host = $instance_info->url;
-    $db_name = $instance_info->db_name;
-    $db_user = $instance_info->db_user_name;
+    $db_name = $instance_info->database_name;
+    $db_user = $instance_info->admin_name;
     //TODO:  why doesnt it need the db password?
 
-    $db_pass = $instance_info->db_password;
+    $db_pass = $instance_info->admin_password;
 
     /****
      * The goal is to make the password same for all organism for same emailid.
@@ -265,7 +263,7 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
 
   elseif ($status == 0) {
     db_update('webapollo_users')
-    ->fields(['status' => $status])
+      ->fields(['status' => $status])
       ->condition('uid', $uid, '=')
       ->execute();
     drupal_set_message(t('The apollo request for %name has been successfuly rejected.', ['%name' => $values['name']]), $type = 'status');
@@ -273,5 +271,3 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/tripal/apollo/users';
   return;
 }
-
-
