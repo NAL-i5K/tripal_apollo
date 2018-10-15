@@ -173,7 +173,12 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
     //TODO:  drupal best practices running scripts?
     //TODO: get python path via admin setting.
 
-    $exec_user = exec($python_path . " " . $script_path . " -dbuser " . $db_user . " -dbname " . $db_name . " -user " . $user . " -pwd " . $user_pass . " -host " . $host);
+    $exec_user = exec($python_path . " " . $script_path . " -dbuser " . $db_user .
+      " -dbname " . $db_name .
+      "-dbpass " . $db_pass .
+      " -user " . $user .
+      " -pwd " . $user_pass .
+      " -host " . $host);
 
 
     //TODO:  sounds like apollo 1 support feature-level permissions.  How do we suppor this?

@@ -4,3 +4,4 @@ package = Custom
 version = 1.0
 core = 7.x
 dependencies[] = tripal
+dependencies[] = encrypt

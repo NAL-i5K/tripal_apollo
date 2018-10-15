@@ -198,6 +198,7 @@ function tripal_apollo_registration_form_submit($form, &$form_state) {
   }
   else {
     $password = tripal_apollo_gen_xkcd_password(2);
+
     $au_id = db_insert('apollo_user')
       ->fields([
         'uid' => $uid,
