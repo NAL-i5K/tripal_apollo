@@ -199,11 +199,13 @@ function tripal_apollo_registration_form_submit($form, &$form_state) {
   else {
     $password = tripal_apollo_gen_xkcd_password(2);
 
+    $password = tripal_apollo_encrypt($password);
+
     $au_id = db_insert('apollo_user')
       ->fields([
         'uid' => $uid,
         'name' => $values['name'],
-        'pass' => encrypt($password),
+        'pass' => $password,
         'email' => $email,
         'institution' => $values['institution'],
         'comment' => $values['comments'],
