@@ -77,17 +77,118 @@ function tripal_apollo_get_elligible_records() {
 }
 
 /**
- * Helper function for using the encrypt module.  Since installing some of the prereq libraries can be a pain (particularly on OSX) we allow disabling it via variable.
+ * Helper function for using the encrypt module.  Since installing some of the
+ * prereq libraries can be a pain (particularly on OSX) we allow disabling it
+ * via variable.
  *
  * @param $string
  *
  * @return : encrypted string, or unencrypted string
  */
-function tripal_apollo_encrypt($string){
-$encrypt = variable_get('tripal_apollo_encrypt');
+function tripal_apollo_encrypt($string) {
+  $encrypt = variable_get('tripal_apollo_encrypt');
 
-if ($encrypt){
-  $string = encrypt($string);
-}
+  if ($encrypt) {
+    $string = encrypt($string);
+  }
   return $string;
+}
+
+/**
+ * @see tripal_apollo_encrypt
+ */
+function tripal_apollo_decrypt($string) {
+  $encrypt = variable_get('tripal_apollo_encrypt');
+
+  if ($encrypt) {
+    $string = decrypt($string);
+  }
+  return $string;
+}
+
+/**
+ * @param $values | Form values from tripal_apollo_approve_user_request_form.
+ *   Contains the information about the user and the record.
+ * @param $instance_info | An apollo_instance record.
+ *
+ * @return bool | TRUE if successful, FALSE otherwise
+ */
+function tripal_apollo_create_user_permissions($values, $instance_info) {
+
+
+  //Note that for apollo 1 this is the db credentials.  For apollo 2 its the site admin credentials.
+  $admin_pass = tripal_apollo_decrypt($instance_info->admin_password);
+  $admin_user = $instance_info->admin_name;
+  $host = $instance_info->url;
+
+
+  $user = $values['email'];
+  $name = explode(" ", $values['name'], 2);
+  $fname = $name[0];
+  $lname = $name[1];
+  $group_base = "some_group";
+
+  $user_pass = tripal_apollo_apollo_decrypt($values['pass']);
+
+
+  $python_path = variable_get('tripal_apollo_python_path');
+  $script_path = drupal_get_path('module', 'tripal_apollo') . '/bin/';
+
+  if ($instance_info->apollo_version === 1) {
+    //Apollo 1 registration
+
+    $script_path .= 'adduser.py';
+
+    $db_name = $instance_info->database_name;
+
+    $exec_user = exec($python_path . " " . $script_path .
+      " -dbuser " . $admin_user .
+      " -dbname " . $db_name .
+      "-dbpass " . $admin_pass .
+      " -user " . $user .
+      " -pwd " . $user_pass .
+      " -host " . $host);
+
+
+    // if apollo 1, we need to set the track level permissions
+
+
+    //Only on prod we have data for species seqids.txt files, but not on dev. change the seqids.txt file while testing on gmod-dev server
+    /*($organism_short_name == 'diacit')
+      $seqids = '/app/data/other_species/'.$organism_short_name.'/seqids/seqids.txt';
+    else
+      $seqids = '/app/data/BCM_i5k_pilot/'.$organism_short_name.'/seqids/seqids.txt';
+
+    $set_permissions =  shell_exec("perl set_track_permissions.pl -D ".$db_name." -U ".$db_user." -P ".$db_pass." -u ".$user." -t ".$seqids." -rw");
+    */
+
+    //DEVELOPMENT
+    // $set_permissions =  shell_exec("perl set_track_permissions.pl -D ".$db_name." -U ".$db_user." -P ".$db_pass." -u ".$user." -t trackseq.txt -rw");
+
+  }
+  else {
+
+    $script_path .= 'adduser2.py';
+
+    $command_base = $python_path . " " . $script_path .
+      " -dbuser " . $admin_user .
+      "-dbpass " . $admin_pass .
+      " -user " . $user .
+      " -pwd " . $user_pass .
+      " -host " . $host .
+      " -fname " . $fname .
+      " -lname " . $lname;
+
+    $exec_user = exec($command_base .
+      " -group " . $group_base . "_READ");
+
+    $exec_user = exec($command_base .
+      " -group " . $group_base . "_WRITE");
+    //Parameters not supplied:
+    //metadata, token
+
+  }
+
+
+  return TRUE;
 }
