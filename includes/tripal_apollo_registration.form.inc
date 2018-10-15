@@ -1,16 +1,67 @@
 <?php
 
-//TODO:  I would prefer to make this all happen in Vanilla drupal upon standard user account creation.
-
-
 /**
  *  hook_form() registration form for the web apollo
  */
 function tripal_apollo_registration_form($form, &$form_state) {
 
+
   $form['instructions'] = [
-    '#markup' => '<div id=\"tripal_apollo_param\">Complete the form below and click \'Submit\' to register for an Apollo account.  Only registered users can view, create or change annotations.</div>'
+    '#markup' => '<div id=\"tripal_apollo_param\">Complete the form below and click \'Submit\' to register for an Apollo account.  Only registered users can view, create or change annotations.</div>',
   ];
+
+  $organisms = chado_get_organism_select_options(FALSE);
+
+  unset($organisms[0]);
+
+  //remove records user is already associated with.
+
+  global $user;
+
+  $associated_records = [];
+  //if we're logged in, remove the records already associated.
+  if ($user->uid > 0) {
+
+    $form['uid'] = [
+      '#type' => 'value',
+      '#value' => $user->uid,
+    ];
+
+    $query = db_select('apollo_user_record', 'aur')
+      ->fields('aur', ['record_id'])
+      ->join('apollo_user', 'au', 'auri.apollo_user_id = au.id');
+    $query->condition('au.uid', $user->uid);
+
+    $results = $query->execute->fetchAll();
+
+
+    foreach ($results as $result) {
+      $record_id = $result->record_id;
+      unset($organisms[$record_id]);
+
+      $record = chado_get_organism(['organism_id' => $record_id]);
+
+
+      $associated_records[] = implode(' ', [$record->genus, $record->species]);
+    }
+
+    if (!empty($associated_records)) {
+      $message = 'You have already requested access to the following records:<ul>';
+
+      foreach ($associated_records as $label) {
+        $message .= '<li> ' . $label . '</li>';
+      }
+      $message .= '</ul>';
+
+      $form['existing'] = [
+        '#type' => 'markup',
+        '#markup' => $message,
+      ];
+    }
+
+  }
+
+
   $form['name'] = [
     '#type' => 'textfield',
     '#title' => t('Full Name'),
@@ -26,12 +77,6 @@ function tripal_apollo_registration_form($form, &$form_state) {
     '#description' => 'The email address you will use to log in to the Apollo server.',
     '#default_value' => NULL,
   ];
-
-  //TODO: functionality could allow you to associate organisms with web apollo if necessary?  Otherwise, just all chado organisms.
-
-  $organisms = chado_get_organism_select_options(FALSE);
-
-  unset($organisms[0]);
 
   $form['organism'] = [
     '#type' => 'select',
@@ -63,6 +108,8 @@ function tripal_apollo_registration_form($form, &$form_state) {
 }
 
 /**
+ * Implements hook_validate().
+ *
  * Web apollo registration form validation
  * 1 - organism field is required
  * 2 - Email should be valid
@@ -85,25 +132,22 @@ function tripal_apollo_registration_form_validate($form, &$form_state) {
   $organisms = $form_state['values']['organism'];
   $email = $form_state['values']['mail'];
 
-  //Check if this email is already associated with this organism.
+  //Check if this user is already associated with this organism.
 
-  $results = db_select('webapollo_users', 'w')
-    ->fields('w', ['uid', 'organisms'])
-    ->condition('w.email', $email)
-    ->condition('w.organisms', $organisms, 'IN')
-    ->execute()
+  $query = db_select('apollo_user_record', 'aur');
+  $query->join('apollo_user', 'au');
+  $query->fields('aur', ['id'])
+    ->condition('au.email', $email)
+    ->condition('aur.record_id', $organisms, 'IN');
+
+  $results = $query->execute()
     ->fetchAll();
-
-  $cnt = 0;
 
   if ($results) {
     $message = "You are already registered for the following organisms: ";
 
     foreach ($results as $key => $result) {
-
-      //TODO: Previous entries store a special organism/genus key instead of organism_id currently.
-      //see @ticket 11
-      $organism = chado_get_organism(['organism_id' => $result->organisms]);
+      $organism = chado_get_organism(['organism_id' => $result->record_id]);
       $message .= $organism->abbreviation . ", ";
     }
     form_set_error('organism', $message);
@@ -111,82 +155,77 @@ function tripal_apollo_registration_form_validate($form, &$form_state) {
   }
 }
 
+/**
+ * Implements hook_submit().
+ * Creates requests for each selected record for the user.
+ * Notifies user and admin via email.
+ */
 function tripal_apollo_registration_form_submit($form, &$form_state) {
   $admin_email = variable_get('site_mail');
   $values = $form_state['values'];
 
-  /****
-   * The goal is to make the password same for all organism for a given email.
-   * First check for the email already registered for any organism with status=1, if yes then take the most recent password.
-   * IF not then check for email with status=2, then take most recent password and update in webapollo_users table.
-   */
-
-  //TODO:  Switching to a different schema would be really helpful here.
-
+  //Is there a user record?
   $email = $values['mail'];
-  $check_email_status1_exists = db_select('webapollo_users', 'w')
-    ->fields('w', ['uid', 'name', 'pass', 'organisms'])
-    ->condition('w.email', $email, '=')
-    ->condition('w.status', 1, '=')
-    ->orderby('w.created', 'desc')
-    ->range(0, 1)
-    ->execute()->fetchObject();
+  $uid = isset($values['uid']) ? $values['uid'] : NULL;
 
-  $check_email_status2_exists = db_select('webapollo_users', 'w')
-    ->fields('w', ['uid', 'name', 'pass', 'organisms'])
-    ->condition('w.email', $email, '=')
-    ->condition('w.status', 2, '=')
-    ->orderby('w.created', 'desc')
-    ->range(0, 1)
-    ->execute()->fetchObject();
+  $query = db_select('apollo_user', 'au')
+    ->fields('au', ['uid', 'pass', 'email', 'id'])
+    ->condition('au.email', $email);
+  $result = $query->execute()->fetchObject();
 
-  if (isset($check_email_status1_exists) && !empty($check_email_status1_exists)) {
-    $pass = $check_email_status1_exists->pass;;
-  }
-  elseif (isset($check_email_status2_exists) && !empty($check_email_status2_exists)) {
-    $pass = $check_email_status2_exists->pass;
+  //If not, create password and user record
+
+  if ($result) {
+    $password = $result->pass;
+    $au_id = $result->id;
+
   }
   else {
-    $pass = tripal_apollo_gen_xkcd_password(2);
+    $password = tripal_apollo_gen_xkcd_password(2);
+    $au_id = db_insert('apollo_user')
+      ->fields([
+        'uid' => $uid,
+        'name' => $values['name'],
+        'pass' => $password,
+        'email' => $email,
+        'institution' => $values['institution'],
+        'comment' => $values['comments'],
+        'create' => time(),
+      ])
+      ->execute();
+  }
+  //write link with status 0
+  foreach ($values['organism'] as $record_id => $organism_val) {
+
+    drupal_write_record('apollo_user_record', [
+
+      'record_id' => $record_id,
+      'apollo_user_id' => $au_id,
+      'status' => 0 //pending request
+    ]);
   }
 
-  $created = time();
-
-  foreach ($values['organism'] as $key => $organism_val) {
-    $data = [
-      'name' => $values['name'],
-      'pass' => $pass,
-      'email' => $values['mail'],
-      'organisms' => $organism_val,
-      'institution' => $values['institution'],
-      'comment' => $values['comments'],
-      'created' => $created,
-    ];
-    drupal_write_record('webapollo_users', $data);
-  }
-
-  // E-mail address of the sender: as the form field is a text field.
+  //send emails
   $from = $values['name'] . "<" . $values['mail'] . ">";
-
-  // Send the e-mail to the recipients using the site default language.
   $sent = drupal_mail('tripal_apollo', 'notify_admin_organism_request', $admin_email, language_default(), $values, $from, TRUE);
+
 
   if (empty($sent['result']) || ($sent['result'] != 1)) {
     /*handle send fail, $sent ===false when mail fails, but it won't always recognize a failure*/
-    drupal_set_message(t('Failed to send e-mail.'));
+    drupal_set_message(t('Error: Failed to send e-mail notification.'));
   }
   else {
-    drupal_set_message(t('Your message has been sent. You will receive an email confirmation shortly.'));
+    drupal_set_message(t('Thank you for requesting Apollo access. You will receive an email confirmation shortly.'));
   }
 
   //Email to the registered user stating successfully registered and once approved from admin you can login to the site
   $user_email_sent = drupal_mail('tripal_apollo', 'notify_user_organism_request', $values['mail'], language_default(), $values, $admin_email, TRUE);
 
   if (empty($user_email_sent['result']) || ($user_email_sent['result'] != 1)) {
-    drupal_set_message(t('Failed to send the email due to some technical problems'));
+    drupal_set_message(t('Error: Failed to send e-mail notification.'));
+
   }
 
-  // Jump to home page rather than back to web apollo registration page to avoid
-  // contradictory messages if flood control has been activated.
+  //return to homepage
   $form_state['redirect'] = variable_get('site_frontpage');
 }

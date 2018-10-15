@@ -3,6 +3,7 @@
 require_once 'includes/tripal_apollo_api.inc';
 require_once 'includes/tripal_apollo.node.inc';
 require_once 'includes/tripal_apollo_mail.inc';
+require_once 'includes/tripal_apollo.api.inc';
 
 //forms dont need to be
 //require_once 'includes/tripal_apollo_admin.form.inc';
