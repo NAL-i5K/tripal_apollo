@@ -80,6 +80,7 @@ function tripal_apollo_registration_form($form, &$form_state) {
   $form['name'] = [
     '#type' => 'textfield',
     '#title' => t('Full Name'),
+    '#description' => t('Please provide your first and last name separated by a space.'),
     '#maxlength' => 255,
     '#required' => TRUE,
   ];
