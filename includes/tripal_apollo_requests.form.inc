@@ -6,11 +6,8 @@
  */
 function tripal_apollo_requests_form($form, &$form_state) {
   $user_info = tripal_apollo_user_table();
-
   $form['users'] = ['#markup' => $user_info];
-
   return $form;
-
 }
 
 /**
@@ -28,7 +25,6 @@ function tripal_apollo_user_table() {
     else {
       $sort = 'DESC';
     }
-
     // Which column will be sorted
     switch ($_GET['order']) {
       case 'Name':
@@ -37,8 +33,8 @@ function tripal_apollo_user_table() {
       case 'Email':
         $order = 'email';
         break;
-      case 'Organism':
-        $order = 'organisms';
+      case 'Record':
+        $order = 'record_id';
         break;
       case 'Status':
         $order = 'status';
@@ -53,23 +49,31 @@ function tripal_apollo_user_table() {
     $order = 'created';
   }
 
-  $query = db_select("webapollo_users", "w");
-  $query->fields("w", [
-    "uid",
-    "name",
-    "email",
-    "organisms",
-    "status",
-    "created",
+  $query = db_select("apollo_user_record", "aur");
+
+  $query->fields('aur', [
+    'id',
+    'record_id',
+    'status',
+    'created'
   ]);
+  $query->join('apollo_instance_record', 'air', 'air.record_id = aur.record_id');
+
+  $query->fields('air', [
+    'instance_id',
+    'record_id',
+  ]);
+  $query->join('apollo_user', 'au', 'au.id = aur.apollo_user_id');
+  $query->fields('au', ['name', 'email']);
   $query->orderBy($order, $sort);
   $query = $query->extend('TableSort')->extend('PagerDefault')->limit(25);
-
   $result = $query->execute();
+
+
   $header = [
     ["data" => t('Name'), "field" => "name"],
     ["data" => t('Email'), "field" => "email"],
-    ["data" => t('Organism'), "field" => "Organisms"],
+    ["data" => t('Record'), "field" => "record_id"],
     ["data" => t('Status'), "field" => "status"],
     ["data" => t('Created'), "field" => "created", 'sort' => 'desc'],
     [],
@@ -79,12 +83,13 @@ function tripal_apollo_user_table() {
   $rows = [];
   $i = 0;
 
+
   // Looping for filling the table rows
   while ($data = $result->fetchObject()) {
-
     //convert organism_id to organism name
+    //TODO:  support multiple base tables
 
-    $organism = chado_get_organism(['organism_id' => $data->organisms]);
+    $organism = chado_get_organism(['organism_id' => $data->record_id]);
 
     $organism_string = $organism->genus . ' ' . $organism->species;
 
@@ -104,7 +109,7 @@ function tripal_apollo_user_table() {
     }
     $rows[$i][] = $status;
     $rows[$i][] = date('M d Y h:i:s A', $data->created);
-    $rows[$i][] = l(t('Edit'), 'admin/tripal/apollo/users/' . $data->uid);
+    $rows[$i][] = l(t('Edit'), 'admin/tripal/apollo/users/' . $data->id);
     $i++;
   }
 
@@ -118,23 +123,10 @@ function tripal_apollo_user_table() {
         // Table header will be sticky
         "caption" => "",
         "colgroups" => [],
-        "empty" => t("Table has no row!")
+        "empty" => t("There are no Apollo registration requests.")
         // The message to be displayed if table is empty
       ]
     ) . theme("pager");
 
   return $output;
-}
-
-
-/**
- * Search key by value from an array
- **/
-function searchkey($organism_data, $needle) {
-  foreach ($organism_data as $key => $data) {
-    if (strcmp($key, $needle) == 0) {
-      return $key;
-    }
-  }
-  return FALSE;
 }

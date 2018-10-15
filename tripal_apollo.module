@@ -3,6 +3,7 @@
 require_once 'includes/tripal_apollo_api.inc';
 require_once 'includes/tripal_apollo.node.inc';
 require_once 'includes/tripal_apollo_mail.inc';
+require_once 'includes/tripal_apollo.api.inc';
 
 //forms dont need to be
 //require_once 'includes/tripal_apollo_admin.form.inc';
@@ -61,8 +62,6 @@ function tripal_apollo_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => ['tripal_apollo_registration_form'],
     'access arguments' => ['access apollo'],
-    'type' => MENU_CALLBACK,
-    'weight' => 100,
     'file' => 'includes/tripal_apollo_registration.form.inc',
   ];
 
@@ -95,13 +94,12 @@ function tripal_apollo_menu() {
     'file' => 'includes/tripal_apollo_admin_form.inc',
   ];
 
-
   return $items;
 }
 
-
 /**
  * Theme for the user approval page.
+ *
  * @param $variables
  *
  * @return string

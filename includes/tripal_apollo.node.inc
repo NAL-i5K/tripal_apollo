@@ -96,17 +96,6 @@ function apollo_instance_form($node, &$form_state) {
     'project ' => 'Project',
   ];
 
-  $form['core']['base_table'] = [
-    '#type' => 'select',
-    '#options' => $table_choices,
-    '#title' => t("Chado Base Table"),
-    '#description' => 'Each record can only be associated with one instance.  We suggest associating instances with organisms.  However, if you would like to support different assemblies for the same organism, you can use the chado project or analysis table instead.',
-    '#default_value' => property_exists($node, 'base_table') ? $node->base_table : 'organism',
-    '#ajax' => [
-      'callback' => 'tripal_apollo_record_callback',
-      'wrapper' => 'tripal_apollo_record_wrapper',
-    ],
-  ];
 
   $select = [1 => 'Apollo 1', 2 => 'Apollo 2'];
 
@@ -143,10 +132,7 @@ function apollo_instance_form($node, &$form_state) {
   ];
 
 
-  $selected = isset($form_state['values']['base_table']) ? $form_state['values']['base_table'] : 'organism';
-
-
-  $record_list = tripal_apollo_build_record_select($selected);
+  $record_list = tripal_apollo_build_record_select();
 
 
   $form['core']['records'] = [
@@ -154,8 +140,6 @@ function apollo_instance_form($node, &$form_state) {
     '#title' => 'Associated Records',
     '#multiple' => TRUE,
     '#description' => 'Select which records are associated with this instance.  A record can only be associated with one instance: setting this instance will overwrite others.',
-    '#prefix' => '<div id="tripal_apollo_record_wrapper">',
-    '#suffix' => '</div>',
     '#options' => $record_list,
   ];
 
@@ -218,14 +202,12 @@ function apollo_instance_insert($node) {
     'database_name' => $node->database_name,
     'admin_name' => $node->admin_name,
     'admin_password' => $password,
-    'base_table' => $node->base_table,
   ])->execute();
 
   //associate records with this instance.  Clear a pre-exisiting record then insert.
 
   foreach ($node->records as $record) {
     db_delete('apollo_instance_record')
-      ->condition('base_table', $node->base_table)
       ->condition('record_id', $record)
       ->execute();
 
@@ -233,7 +215,6 @@ function apollo_instance_insert($node) {
       ->fields([
         'instance_id' => $id,
         'record_id' => $record,
-        'base_table' => $node->base_table,
       ])
       ->execute();
 
@@ -256,7 +237,6 @@ function apollo_instance_update($node) {
     'apollo_version' => $node->apollo_version,
     'database_name' => $node->database_name,
     'admin_name' => $node->admin_name,
-    'base_table' => $node->base_table,
   ];
 
 
@@ -271,7 +251,6 @@ function apollo_instance_update($node) {
   foreach ($node->records as $record) {
 
     db_delete('apollo_instance_record')
-      ->condition('base_table', $node->base_table)
       ->condition('record_id', $record)
       ->execute();
 
@@ -279,7 +258,6 @@ function apollo_instance_update($node) {
       ->fields([
         'instance_id' => $id,
         'record_id' => $record,
-        'base_table' => $node->base_table,
       ])
       ->execute();
   }
@@ -314,7 +292,6 @@ function apollo_instance_load($nodes) {
     $nodes[$record->nid]->database_name = $record->database_name;
     $nodes[$record->nid]->url = $record->url;
     $nodes[$record->nid]->apollo_version = $record->apollo_version;
-    $nodes[$record->nid]->base_table = $record->base_table;
     $nodes[$record->nid]->title = $record->name;
   }
 
@@ -328,8 +305,6 @@ function apollo_instance_load($nodes) {
 function tripal_apollo_node_insert($node) {
   if ($node->type == 'apollo_instance') {
     $node->title = $node->instance_name;
-
-    dpm($node);
   }
 }
 
@@ -343,20 +318,18 @@ function tripal_apollo_node_update($node) {
   }
 }
 
-function tripal_apollo_record_callback($form, &$form_state) {
-  return $form['core']['records'];
-}
-
 
 /**
  *
  * Build select options for all records of a given table.
  *
- * @param $base_table | expects organism, analysis, or project
+ *It expects base table to be organism, analysis, or project
  *
  * @return array | select option array of key -> label
  */
-function tripal_apollo_build_record_select($base_table) {
+function tripal_apollo_build_record_select() {
+
+  $base_table = variable_get('tripal_apollo_base_table');
 
   $table_key = $base_table . '_id';
   $select = [];

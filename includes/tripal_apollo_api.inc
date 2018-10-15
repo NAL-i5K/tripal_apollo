@@ -28,3 +28,50 @@ function tripal_apollo_gen_xkcd_password($num_of_words = 1) {
   }
   return $password;
 }
+
+/**
+ * Fetches all records associated with an Apollo instance.
+ */
+function tripal_apollo_get_elligible_records() {
+
+  $base = variable_get('tripal_apollo_base_table');
+  $base_key = $base . '_id';
+
+  $records = db_select('apollo_instance_record', 'tair')
+    ->fields('tair', ['record_id'])
+    ->execute();
+
+  $out = [];
+
+  foreach ($records as $record) {
+    $record_id = $record->record_id;
+    switch ($base) {
+      case 'organism':
+
+        $result = chado_select_record($base, [
+          'genus',
+          'species',
+        ], [$base_key => $record_id]);
+
+        $result = $result[0];
+
+        $out[$record_id] = $result->genus . ' ' . $result->species;
+        break;
+      /**
+       * By default we can just use name.
+       */
+      case 'default':
+        $chado_record = chado_select_record($base, [
+          'name',
+        ], [$base_key => $record_id]);
+        $result = chado_select_record($base, [$base_key => $record_id]);
+        $result = $result[0];
+        $out[$record_id] = $result->name;
+        break;
+    }
+
+
+  }
+
+  return $out;
+}
