@@ -52,11 +52,12 @@ function tripal_apollo_user_table() {
   $query = db_select("apollo_user_record", "aur");
 
   $query->fields('aur', [
+    'id',
     'record_id',
     'status',
-    'created',
-    'id',
+    'created'
   ]);
+  $query->join('apollo_instance_record', 'air', 'air.record_id = aur.record_id');
 
   $query->fields('air', [
     'instance_id',
@@ -66,8 +67,9 @@ function tripal_apollo_user_table() {
   $query->fields('au', ['name', 'email']);
   $query->orderBy($order, $sort);
   $query = $query->extend('TableSort')->extend('PagerDefault')->limit(25);
-
   $result = $query->execute();
+
+
   $header = [
     ["data" => t('Name'), "field" => "name"],
     ["data" => t('Email'), "field" => "email"],
@@ -81,11 +83,12 @@ function tripal_apollo_user_table() {
   $rows = [];
   $i = 0;
 
+
   // Looping for filling the table rows
   while ($data = $result->fetchObject()) {
-
     //convert organism_id to organism name
     //TODO:  support multiple base tables
+
     $organism = chado_get_organism(['organism_id' => $data->record_id]);
 
     $organism_string = $organism->genus . ' ' . $organism->species;
@@ -120,7 +123,7 @@ function tripal_apollo_user_table() {
         // Table header will be sticky
         "caption" => "",
         "colgroups" => [],
-        "empty" => t("Table has no row!")
+        "empty" => t("There are no Apollo registration requests.")
         // The message to be displayed if table is empty
       ]
     ) . theme("pager");

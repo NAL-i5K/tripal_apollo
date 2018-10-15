@@ -5,48 +5,67 @@
  */
 function tripal_apollo_registration_form($form, &$form_state) {
 
-
   $form['instructions'] = [
     '#markup' => '<div id=\"tripal_apollo_param\">Complete the form below and click \'Submit\' to register for an Apollo account.  Only registered users can view, create or change annotations.</div>',
   ];
 
-  $organisms = chado_get_organism_select_options(FALSE);
 
-  unset($organisms[0]);
+  $choices = tripal_apollo_get_elligible_records();
+  if (!$choices) {
+    $form['instructionsp2'] = [
+      '#markup' => '<p>Apollo configuration is still underway.  <p>Please contact a site administrator</p></p></div>',
+    ];
+    return $form;
+  }
 
-  //remove records user is already associated with.
+  //remove records user is already associated with, and the prebuilt null selection.
 
   global $user;
 
   $associated_records = [];
   //if we're logged in, remove the records already associated.
-  if ($user->uid > 0) {
 
+  if ($user->uid > 0) {
     $form['uid'] = [
       '#type' => 'value',
       '#value' => $user->uid,
     ];
 
     $query = db_select('apollo_user_record', 'aur')
-      ->fields('aur', ['record_id'])
-      ->join('apollo_user', 'au', 'auri.apollo_user_id = au.id');
+      ->fields('aur', ['record_id']);
+    $query->join('apollo_user', 'au', 'aur.apollo_user_id = au.id');
     $query->condition('au.uid', $user->uid);
 
-    $results = $query->execute->fetchAll();
+    $results = $query->execute()->fetchAll();
 
+    $base = variable_get('tripal_apollo_base_table');
+    $pkey = $base . '_id';
 
     foreach ($results as $result) {
       $record_id = $result->record_id;
-      unset($organisms[$record_id]);
-
-      $record = chado_get_organism(['organism_id' => $record_id]);
+      unset($choices[$record_id]);
 
 
-      $associated_records[] = implode(' ', [$record->genus, $record->species]);
+      if ($base == 'organism') {
+        $chado_record = chado_select_record($base, [
+          'genus',
+          'species',
+        ], [$pkey => $record_id]);
+        $chado_record = $chado_record[0];
+
+        $label = $chado_record->genus . ' ' . $chado_record->species;
+      }
+      else {
+        $chado_record = chado_select_record($base, ['name'], [$pkey => $record_id]);
+        $chado_record = $chado_record[0];
+        $label = $chado_record->name;
+
+      }
+      $associated_records[] = $label;
     }
 
     if (!empty($associated_records)) {
-      $message = 'You have already requested access to the following records:<ul>';
+      $message = 'You have already requested access to the following  '.  $base. 's :<ul>';
       foreach ($associated_records as $label) {
         $message .= '<li> ' . $label . '</li>';
       }
@@ -56,9 +75,7 @@ function tripal_apollo_registration_form($form, &$form_state) {
         '#markup' => $message,
       ];
     }
-
   }
-
 
   $form['name'] = [
     '#type' => 'textfield',
@@ -76,14 +93,15 @@ function tripal_apollo_registration_form($form, &$form_state) {
     '#default_value' => NULL,
   ];
 
+
   $form['organism'] = [
     '#type' => 'select',
-    '#title' => t('Organism'),
-    '#options' => $organisms,
+    '#title' => t('Apollo Content'),
+    '#options' => $choices,
     '#multiple' => TRUE,
     '#required' => TRUE,
-    '#empty_option' => "Please select an Organism",
-    '#description' => 'The organisms you would like access to.',
+    '#empty_option' => "Please select",
+    '#description' => 'The ' . $base . '  you would like access to.',
   ];
 
   $form['institution'] = [
@@ -133,7 +151,7 @@ function tripal_apollo_registration_form_validate($form, &$form_state) {
   //Check if this user is already associated with this organism.
 
   $query = db_select('apollo_user_record', 'aur');
-  $query->join('apollo_user', 'au');
+  $query->join('apollo_user', 'au', 'au.id = aur.apollo_user_id');
   $query->fields('aur', ['id'])
     ->condition('au.email', $email)
     ->condition('aur.record_id', $organisms, 'IN');
@@ -191,17 +209,18 @@ function tripal_apollo_registration_form_submit($form, &$form_state) {
       ])
       ->execute();
   }
-  //write link with status 0
+  //  //write link with status 0
   foreach ($values['organism'] as $record_id => $organism_val) {
 
-    drupal_write_record('apollo_user_record', [
+    db_insert('apollo_user_record')
+      ->fields([
+        'record_id' => $record_id,
+        'apollo_user_id' => $au_id,
+        'status' => 2,//pending request
+        'created' => time(),
+      ])
+      ->execute();
 
-      'record_id' => $record_id,
-      'apollo_user_id' => $au_id,
-      'status' => 2,//pending request
-      'create' => time(),
-
-    ]);
   }
 
   //send emails
@@ -228,3 +247,4 @@ function tripal_apollo_registration_form_submit($form, &$form_state) {
   //return to homepage
   $form_state['redirect'] = variable_get('site_frontpage');
 }
+

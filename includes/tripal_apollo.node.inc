@@ -328,8 +328,6 @@ function apollo_instance_load($nodes) {
 function tripal_apollo_node_insert($node) {
   if ($node->type == 'apollo_instance') {
     $node->title = $node->instance_name;
-
-    dpm($node);
   }
 }
 

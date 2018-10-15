@@ -14,7 +14,7 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $submissio
   $query = db_select('apollo_user_record', 'aur')
     ->fields('aur', ['record_id', 'status'])
     ->condition('aur.id', $submission_id);
-  $query->join('apollo_user', 'au');
+  $query->join('apollo_user', 'au', 'aur.apollo_user_id = au.id');
   $query->fields('au', ['name', 'pass', 'email', 'institution', 'comment']);
   $data = $query->execute()->fetchObject();
 
@@ -36,28 +36,32 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $submissio
   ];
 
 
-  //todo: genercize to be any content type.
-  $organism_object = chado_get_organism(['organism_id' => $data->record_id]);
+  if (variable_get('tripal_apollo_base_table') == 'organism') {
+    $pkey = "organism_id";
+    $record_object = chado_get_organism(['organism_id' => $data->record_id]);
 
-  $organism_value = $organism_object->abbreviation . ' (' . $organism_object->common_name . ')';
+    $organism_value = $record_object->abbreviation . ' (' . $record_object->common_name . ')';
 
-  $form['web_apollo_table']['organism_key'] = [
-    '#type' => 'value',
-    '#value' => $data->record_id,
-  ];
+    $form['web_apollo_table']['organism_key'] = [
+      '#type' => 'value',
+      '#value' => $data->record_id,
+    ];
 
-  $form['web_apollo_table']['organism'] = [
-    '#type' => 'value',
-    '#value' => $organism_value,
-  ];
+    $form['web_apollo_table']['organism'] = [
+      '#type' => 'value',
+      '#value' => $organism_value,
+    ];
+  }
+  else {
+    //todo: genercize to be any content type.
+  }
 
-  //Look up instance for this organism
-  //TODO: support non-organism base tables.
+  //Look up instance for this record
 
   $query = db_select('apollo_instance_record', 'aio');
   $query->join('apollo_instance', 'ai', 'ai.id  = aio.instance_id');
   $query->fields('ai', ['name', 'id']);
-  $query->condition('aio.record_id', $organism_object->organism_id);
+  $query->condition('aio.record_id', $record_object->$pkey);
   $result = $query->execute()
     ->fetchObject();
 
@@ -94,9 +98,10 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $submissio
   ];
 
   //TODO:  this is not the drupal uid.  Rename the value (here and in theme file)
+
   $form['web_apollo_table']['uid'] = [
     '#type' => 'value',
-    '#value' => $data->id,
+    '#value' => $submission_id,
   ];
 
   $form['web_apollo_table']['pass'] = [
@@ -136,7 +141,8 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
     ->condition('aur.id', $submission_id)
     ->execute()->fetchField();
 
-  $instance_id = $form_state['values']['instance_id'];
+  //$instance_id = $form_state['values']['instance_id'];
+
   $record_id = $values['organism_key'];
 
   $query = db_select('apollo_instance_record', 'air')
