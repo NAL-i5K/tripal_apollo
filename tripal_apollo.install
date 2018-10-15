@@ -162,31 +162,33 @@ function tripal_apollo_uninstall() {
   variable_del('web_apollo_organism');
   variable_del('web_apollo_recipients');
   variable_del('tripal_apollo_python_path');
-}
-
-/**
- * Remove all Apollo nodes
- */
 
 
-$query = new EntityFieldQuery();
-$query->entityCondition('entity_type', 'node')
-  ->entityCondition('bundle', 'apollo')
-  // Restrict to Published nodes.
-  ->propertyCondition('status', 1)
-  // Restrict to nodes the current user has permission to view.
-  ->addTag('node_access');
-$entities = $query->execute();
+  /**
+   * Remove all Apollo nodes
+   */
 
-// Get all apollo nodes and delete them
-$nodes = node_load_multiple(array_keys($entities['node']));
-foreach ($nodes as $node) {
-  print "Delete node " . $node->title . "\n";
-  $nrs = node_revision_list($node);
-  foreach ($nrs as $nr) {
-    node_revision_delete($nr->vid);
+
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'apollo')
+    // Restrict to Published nodes.
+    ->propertyCondition('status', 1)
+    // Restrict to nodes the current user has permission to view.
+    ->addTag('node_access');
+  $entities = $query->execute();
+
+  // Get all apollo nodes and delete them
+  $nodes = node_load_multiple(array_keys($entities['node']));
+  foreach ($nodes as $node) {
+    print "Delete node " . $node->title . "\n";
+    $nrs = node_revision_list($node);
+    foreach ($nrs as $nr) {
+      node_revision_delete($nr->vid);
+    }
+    node_delete($node->nid);
+
   }
-  node_delete($node->nid);
 
 }
 
