@@ -15,9 +15,8 @@ import argparse, psycopg2, sys
 parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter, description='''
 Insert a new WebApollo user into PostgreSQL DB and add read/write permissions of all tracks for the user.
 Example Usage:
-\tadduser.py -dbuser web_apollo_users_admin -dbname cercap_users -dbpass mypass -user abc123
-\tadduser.py -dbuser web_apollo_users_admin -dbname cercap_users -dbpass mypass -user abc123 -pwd 123456 -host apollo.nal.usda.gov
-\t(When connect to remote host, make sure the host accept remote connection by editing pg_hba.conf)
+\tadduser.py -dbuser apollo_db_admin_user -dbname apollo_db_name -dbpass mypass -user abc123 -pwd 123456 -host some.host.com
+\t(When connect to remote host, make sure the host accepts remote connection by editing pg_hba.conf)
 ''')
 parser.add_argument('-dbuser', help="Username used to connect database", required=True)
 parser.add_argument('-dbname', help="Database name to be connected", required=True)
