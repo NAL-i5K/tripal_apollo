@@ -158,13 +158,14 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
     $host = $instance_info->url;
     $db_name = $instance_info->database_name;
     $db_user = $instance_info->admin_name;
-    //TODO:  why doesnt it need the db password?
 
-    $db_pass = $instance_info->admin_password;
+    $db_pass = decrypt($instance_info->admin_password);
 
     $email = $to;
 
     $user = $values['email']; //Note: same as $to and $email.
+    $values['pass'] = decrypt($values['pass']);
+    //decrypt so we can email to user and 
     $user_pass = $values['pass'];
 
     $python_path = variable_get('tripal_apollo_python_path');

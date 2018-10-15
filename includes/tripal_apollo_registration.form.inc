@@ -192,7 +192,7 @@ function tripal_apollo_registration_form_submit($form, &$form_state) {
   //If not, create password and user record
 
   if ($result) {
-    $password = $result->pass;
+    $password = decrypt($result->pass);
     $au_id = $result->id;
 
   }
@@ -203,7 +203,7 @@ function tripal_apollo_registration_form_submit($form, &$form_state) {
       ->fields([
         'uid' => $uid,
         'name' => $values['name'],
-        'pass' => $password,
+        'pass' => encrypt($password),
         'email' => $email,
         'institution' => $values['institution'],
         'comment' => $values['comments'],
