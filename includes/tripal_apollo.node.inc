@@ -143,6 +143,9 @@ function apollo_instance_form($node, &$form_state) {
     '#options' => $record_list,
   ];
 
+  //encrypt.  Installing encryption is a pain on OSX so we disable for testing!
+  $form['core']['encrypt'] = ['#type' => 'value', '#value' => TRUE];
+
   return $form;
 }
 
@@ -192,7 +195,11 @@ function apollo_instance_form_validate($form, $form_state) {
 
 function apollo_instance_insert($node) {
 
-  $password = encrypt($node->admin_password);
+  $password = $node->admin_password;
+  if ($node->encrypt) {
+
+    $password = encrypt($password);
+  }
 
   $id = db_insert('apollo_instance')->fields([
     'nid' => $node->nid,
