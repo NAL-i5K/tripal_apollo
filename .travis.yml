@@ -19,5 +19,6 @@ script:
   - tar -zxvf example_data/yeast.tar.gz
   - docker run -it -d -p --name apollo 8888:8080 -v yeast:/data/yeast quay.io/gmod/docker-apollo:2.1.0
   - sleep 30 # We pause here so postgres and apache complete booting up
+  - sh bin/set_travis_apollo.sh
   - docker exec -it tripal drush pm-enable -y tripal_apollo
   - docker exec -it tripal bash -c "cd /modules/tripal_apollo && composer install && DRUPAL_ROOT=/var/www/html ./vendor/bin/phpunit"
