@@ -205,7 +205,7 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
     //Parameters not supplied:
     //metadata, token
   }
-  
+
 
 
 
