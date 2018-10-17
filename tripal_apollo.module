@@ -4,7 +4,6 @@ require_once 'includes/tripal_apollo_api.inc';
 require_once 'includes/tripal_apollo.node.inc';
 require_once 'includes/tripal_apollo_mail.inc';
 require_once 'includes/tripal_apollo.api.inc';
-variable_set('tripal_apollo_encrypt', FALSE);
 
 //forms dont need to be
 //require_once 'includes/tripal_apollo_admin.form.inc';

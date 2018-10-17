@@ -40,8 +40,12 @@ Each row is for a single user - organism request pairing, so a single form submi
 
 ## Site-wide settings
 
-Site-wide settings can be set at `/admin/tripal_apollo`.  Please provide the system path to python on your server (ie `/usr/local/bin/python2.7`) as python is used to create users.
+Site-wide settings can be set at `/admin/tripal_apollo`.  
 
+
+![admin area](docs/admin_area.png)
+
+Note that we encourage enabling encryption of passwords.  However, disabling encryption is provided in case of issues setting up the encryption module.
 
 ## Creating an Apollo Instance
 
