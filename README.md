@@ -1,6 +1,4 @@
-The Tripal Apollo module seeks to bridge Tripal and Apollo user and data management for both Apollo 1 and 2.
-
-This module is under active development and is **not ready** for deployment.
+The Tripal Apollo module seeks to bridge Tripal and Apollo user and data management for both Apollo 1 and 2. 
 
 
 # What is Apollo?
@@ -34,25 +32,41 @@ An email is sent to the user and the site admin email notifying them of the requ
 Registration requests appear at `admin/tripal/apollo/users`.
 
 Each row is for a single user - organism request pairing, so a single form submission may consist of several rows.  The admin can click the "edit" button to view the request, which will list the user name, email, organism.  To approve or reject the request, check the appropriate box and click **Save**.
-
+.
 ![approving a request](docs/approve_request.png)
 
 
 # Admin setup
 
+## Site-wide settings
+
+Site-wide settings can be set at `/admin/tripal_apollo`.  Please provide the system path to python on your server (ie `/usr/local/bin/python2.7`) as python is used to create users.
+
+
 ## Creating an Apollo Instance
 
+First, you must tell the module about your Apollo server.  To do so, go to **Content --> add Content --> Apollo Instance**.
 
-The URL should be the full location of your apollo instance, without a trailing slash.  For example:
+If your server is apollo 1, you will need to provide teh db name, db admin name and password.  Apollo 2 will instead require the admin username and password: the db username is not required.
 
-http://localhost:8888
+The URL should be the full apollo server URL without a trailing slash, for example,  `http://localhost:8888`.  The correct URL is listed in your web services API on your apollo server:
+
+![apollo url](docs/apollo_url.png)
+
+Select all of the organisms you would like linked to this apollo instance.
 
 
-### Web Apollo one and two
+![create apolllo instance](docs/create_apollo_instance.png)
 
-There is a web apollo 1 and 2.  This module supports both instances at a base level.  However certain features are Apollo 2 only (organism syncing for example).
+## Permissions
 
+This module defines the following permissions:
 
+* administer tripal apollo: Administer the module itself.  This permission is for site admins.
+* administer apollo users.  Allows admins to approve/deny apollo access requests.  This permission is for community leaders.
+ * access apollo: allows users to make apollo registration requests.  You can give this permission to anonymous users, allowing users to register for apollo accounts without a Drupal account.
+
+To learn more about setting up permissions and roles, please see https://www.drupal.org/docs/7/managing-users/user-roles
 
 ## References
 
