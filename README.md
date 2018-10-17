@@ -29,7 +29,7 @@ An email is sent to the user and the site admin email notifying them of the requ
 
 ![admin requests](docs/admin_requests.png)
 
-### Approving/denying requests 
+### Approving/denying requests
 
 Registration requests appear at `admin/tripal/apollo/users`.
 
@@ -43,6 +43,10 @@ Each row is for a single user - organism request pairing, so a single form submi
 ## Creating an Apollo Instance
 
 
+The URL should be the full location of your apollo instance, without a trailing slash.  For example:
+
+http://localhost:8888
+
 
 ### Web Apollo one and two
 
@@ -53,4 +57,4 @@ There is a web apollo 1 and 2.  This module supports both instances at a base le
 ## References
 
 
-Dunn NA, Munoz-Torres MC, Unni D, Yao E, Rasche E, Bretaudeau A, Holmes IH, Elsik CG; Lewis SE (2017). GMOD/Apollo: Apollo2.0.6(JB#29795a1bbb) 
+Dunn NA, Munoz-Torres MC, Unni D, Yao E, Rasche E, Bretaudeau A, Holmes IH, Elsik CG; Lewis SE (2017). GMOD/Apollo: Apollo2.0.6(JB#29795a1bbb)

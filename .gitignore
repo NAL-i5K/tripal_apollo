@@ -2,4 +2,4 @@ web_apollo/*
 web_apollo2/*
 .env
 vendor/
-
+idea/*

@@ -125,7 +125,7 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   $user = $values['email'];
   $name = explode(" ", $values['name'], 2);
   $fname = $name[0];
-  $lname = $name[1];
+  $lname =  isset($name[1]) ? $name[1] : $name[0];
 
   //For now we assume the group base is genus_species
   //see @ticket 41
@@ -133,7 +133,7 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   $base = variable_get('tripal_apollo_base_table');
 
   if ($base == 'organism') {
-    $organism = chado_get_organism($base);
+    $organism = chado_get_organism(['organism_id' => $record]);
     $group_base = $organism->genus . '_' . $organism->species;
 
   }
@@ -142,7 +142,7 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   }
 
 
-  $user_pass = tripal_apollo_apollo_decrypt($values['pass']);
+  $user_pass = tripal_apollo_decrypt($values['pass']);
 
 
   $python_path = variable_get('tripal_apollo_python_path');
@@ -183,11 +183,11 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   }
   else {
 
-    $script_path .= 'adduser2.py';
+    $script_path .= 'add_user2.py';
 
     $command_base = $python_path . " " . $script_path .
       " -dbuser " . $admin_user .
-      "-dbpass " . $admin_pass .
+      " -dbpass " . $admin_pass .
       " -user " . $user .
       " -pwd " . $user_pass .
       " -host " . $host .
@@ -197,11 +197,16 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
     $exec_user = exec($command_base .
       " -group " . $group_base . "_READ");
 
+    dpm($command_base .
+        " -group " . $group_base . "_READ");
+
     $exec_user = exec($command_base .
       " -group " . $group_base . "_WRITE");
     //Parameters not supplied:
     //metadata, token
   }
+  
+
 
 
   return TRUE;
