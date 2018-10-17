@@ -6,9 +6,10 @@ curl -i -H 'Content-type: application/json' \
   "{'username' : 'admin@local.host', 'password' : 'password', 'directory' : '/data/yeast',\
   'commonName' : 'yeast', 'genus' : 'saccharomyces',\
   'species' : 'cerevisiae'}"
+
 curl -i -H 'Content-type: application/json' \
   -X POST http://localhost:8888/group/createGroup -d  \
-  "{'username' : 'admin@local.host', 'password' : 'password', 'name' : 'saccharomyces_cerevisiae_READ'"
+  "{'username' : 'admin@local.host', 'password' : 'password', 'name' : 'saccharomyces_cerevisiae_READ'}"
 curl -i -H 'Content-type: application/json' \
   -X POST http://localhost:8888/group/createGroup -d  \
-  "{'username' : 'admin@local.host', 'password' : 'password', 'name' : 'saccharomyces_cerevisiae_WRITE'"
+  "{'username' : 'admin@local.host', 'password' : 'password', 'name' : 'saccharomyces_cerevisiae_WRITE'}"
