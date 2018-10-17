@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PhpIncludePathManager">
+    <include_path>
+      <path value="$PROJECT_DIR$/../../../../../includes" />
+      <path value="$PROJECT_DIR$/../../../../../modules" />
+      <path value="$PROJECT_DIR$/../../ds" />
+      <path value="$PROJECT_DIR$/../../date" />
+      <path value="$PROJECT_DIR$/../../link" />
+      <path value="$PROJECT_DIR$/../../views" />
+      <path value="$PROJECT_DIR$/../../ctools" />
+      <path value="$PROJECT_DIR$/../../entity" />
+      <path value="$PROJECT_DIR$/../../tripal" />
+      <path value="$PROJECT_DIR$/../../encrypt" />
+      <path value="$PROJECT_DIR$/../../redirect" />
+      <path value="$PROJECT_DIR$/../../field_group" />
+      <path value="$PROJECT_DIR$/../../field_group_table" />
+    </include_path>
+  </component>
+</project>

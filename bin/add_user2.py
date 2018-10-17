@@ -55,7 +55,7 @@ def create_insert_str(email, newPassword, firstName, lastName, metadata, token):
     curl_cmd += "\",\"email\":\"" + email + "\",\"newPassword\":\"" + newPassword
     curl_cmd += "\",\"firstName\":\"" + firstName + "\",\"lastName\":\"" + lastName + "\",\"metadata\":\"" + metadata + "\",\"client_token\":\"" + token +"\"}'"
     curl_str.append(curl_cmd)
-    curl_str.append("https://" + host + "/apollo/user/createUser")
+    curl_str.append(host + "/user/createUser")
     return ' '.join(curl_str)
 
 def add_user_permisson_str(group, user, token):
@@ -64,7 +64,7 @@ def add_user_permisson_str(group, user, token):
     curl_cmd += "\",\"group\":\"" + group
     curl_cmd += "\",\"user\":\"" + user + "\",\"client_token\":\"" + token + "\"}'"
     curl_str.append(curl_cmd)
-    curl_str.append("https://" + host + "/apollo/user/addUserToGroup")
+    curl_str.append(host + "/user/addUserToGroup")
     return ' '.join(curl_str)
 
 def createUser(email, newPassword, firstName, lastName, metadata, token):
