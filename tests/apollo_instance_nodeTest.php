@@ -38,6 +38,9 @@ class apollo_instance_nodeTest extends TripalTestCase {
 
   }
 
+
+  //TODO: I moved this to shared.php
+
   private function configureApollo($url) {
     variable_set('tripal_apollo_encrypt', FALSE);
 

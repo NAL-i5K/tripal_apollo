@@ -11,7 +11,7 @@ function tripal_apollo_registration_form($form, &$form_state)
     ];
 
 
-    $choices = tripal_apollo_get_elligible_records();
+    $choices = tripal_apollo_get_eligible_records();
     if (!$choices) {
         $form['instructionsp2'] = [
             '#markup' => '<p>Apollo configuration is still underway.  <p>Please contact a site administrator</p></p></div>',

@@ -1,4 +1,4 @@
-The Tripal Apollo module seeks to bridge Tripal and Apollo user and data management for both Apollo 1 and 2. 
+The Tripal Apollo module seeks to bridge Tripal and Apollo user and data management for both Apollo 1 and 2.
 
 
 # What is Apollo?
