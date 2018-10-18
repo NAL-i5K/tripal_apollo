@@ -17,7 +17,7 @@ before_script:
 script:
   - docker run -it -d --rm --name tripal -v "$(pwd)":/modules/tripal_apollo statonlab/tripal3
   - tar -zxvf example_data/yeast.tar.gz
-  - docker run -it -d --name apollo -p 8888:8080 -v "($pwd)"/yeast:/data/yeast quay.io/gmod/docker-apollo:2.1.0
+  - docker run -it -d --name apollo -p 8888:8080 -v "$(pwd)"/yeast:/data/yeast quay.io/gmod/docker-apollo:2.1.0
   - sleep 300 # We pause here so postgres and apache complete booting up
   - sh bin/set_travis_apollo.sh
   - docker exec -it tripal drush pm-enable -y tripal_apollo
