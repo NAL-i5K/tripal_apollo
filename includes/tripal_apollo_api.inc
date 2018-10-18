@@ -190,11 +190,10 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
       " -fname " . $fname .
       " -lname " . $lname;
 
-    $exec_user = exec($command_base .
-      " -group " . $group_base . "_READ");
 
-    dpm($command_base .
-      " -group " . $group_base . "_READ");
+    //TODO: Make this configurable?
+    $exec_user = exec($command_base .
+      " -group " . $group_base . "_USER");
 
     $exec_user = exec($command_base .
       " -group " . $group_base . "_WRITE");
