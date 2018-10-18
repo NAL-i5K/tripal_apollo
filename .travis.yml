@@ -12,7 +12,7 @@ env:
 
 before_script:
   - docker pull statonlab/tripal3
-  - docker pull quay.io/gmod/docker-apollo
+#  - docker pull quay.io/gmod/docker-apollo
 
 script:
   - docker run -it -d --rm --name tripal -v "$(pwd)":/modules/tripal_apollo statonlab/tripal3

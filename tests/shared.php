@@ -57,4 +57,6 @@
   }
   $node = node_submit($node);
   node_save($node);
+
+  return ['organism' => $organism_id];
 }

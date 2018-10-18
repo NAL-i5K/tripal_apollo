@@ -32,7 +32,7 @@ function tripal_apollo_gen_xkcd_password($num_of_words = 1) {
 /**
  * Fetches all records associated with an Apollo instance.
  */
-function tripal_apollo_get_elligible_records() {
+function tripal_apollo_get_eligible_records() {
 
   $base = variable_get('tripal_apollo_base_table');
   $base_key = $base . '_id';
