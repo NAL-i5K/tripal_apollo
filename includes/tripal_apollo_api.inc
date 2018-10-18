@@ -115,7 +115,6 @@ function tripal_apollo_decrypt($string) {
  */
 function tripal_apollo_create_user_permissions($values, $instance_info) {
 
-
   //Note that for apollo 1 this is the db credentials.  For apollo 2 its the site admin credentials.
   $admin_pass = tripal_apollo_decrypt($instance_info->admin_password);
   $admin_user = $instance_info->admin_name;
@@ -125,7 +124,7 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   $user = $values['email'];
   $name = explode(" ", $values['name'], 2);
   $fname = $name[0];
-  $lname =  isset($name[1]) ? $name[1] : $name[0];
+  $lname = isset($name[1]) ? $name[1] : $name[0];
 
   //For now we assume the group base is genus_species
   //see @ticket 41
@@ -198,7 +197,7 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
       " -group " . $group_base . "_READ");
 
     dpm($command_base .
-        " -group " . $group_base . "_READ");
+      " -group " . $group_base . "_READ");
 
     $exec_user = exec($command_base .
       " -group " . $group_base . "_WRITE");
@@ -207,7 +206,41 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   }
 
 
-
-
   return TRUE;
 }
+
+/**
+ * fetch an apollo object with the instance id
+ *
+ * @param $instance_id
+ *
+ * @return mixed | apollo instance object, or FALSE
+ */
+function tripal_apollo_get_instance($instance_id) {
+
+  $result = db_select('apollo_instance', 't')
+    ->fields('t')
+    ->condition('id', $instance_id)
+    ->execute()
+    ->fetchObject();
+
+  return $result;
+}
+
+
+//
+//function tripal_apollo_get_instance_groups($instance_id) {
+//
+//  $base = tripal_apollo_build_base_request($instance_id);
+//  $instance = tripal_apollo_get_instance($instance_id);
+//  $url = $instance->url . "/groups/loadGroups";
+//  $base . " {$url}";
+//
+//}
+//
+//function tripal_apollo_build_base_request($instance_id) {
+//  $instance = tripal_apollo_get_instance($instance_id);
+//  $base_curl = "curl -i -s -X POST -H 'Content-Type: application/json' -d";
+//
+//  return $base_curl;
+//}
