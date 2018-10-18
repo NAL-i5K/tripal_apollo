@@ -39,7 +39,22 @@ if args.pwd:
     pwd = args.pwd
 perm = args.perm # read=1, write=2, publish=4, admin=8; ex. read+write = 1+2 = 3; system admin = 1+2+4+8 = 15
 
-conn = psycopg2.connect('dbname=' + dbname + ' user=' + dbuser + ' host=' + host)
+if '://' in host :
+    host  = host.split('://', 1)
+    host = host[1]
+
+
+if ':' in host :
+    split_host = host.split(':', 1)
+    host =  split_host[0]
+    port = split_host[1]
+
+connection_string = 'dbname=' + dbname + ' user=' + dbuser + ' host=' + host + ' password=' + dbpass
+
+if port:
+    connection_string = connection_string + ' port=' + port
+
+conn = psycopg2.connect(connection_string)
 cur = conn.cursor()
 
 # If the user already exists then exit

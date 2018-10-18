@@ -38,6 +38,11 @@ Each row is for a single user - organism request pairing, so a single form submi
 
 # Admin setup
 
+## Apollo 1 setup
+
+Apollo 1 does not support a REST API.  Your Apollo 1 server's database must therefore be setup to accept remote connections by editing  `pg_hba.conf`.
+
+
 ## Site-wide settings
 
 Site-wide settings can be set at `/admin/tripal_apollo`.  
