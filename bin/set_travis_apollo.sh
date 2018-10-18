@@ -9,7 +9,7 @@ curl -i -H 'Content-type: application/json' \
 
 curl -i -H 'Content-type: application/json' \
   -X POST http://127.0.0.1:8888/group/createGroup -d  \
-  "{'username' : 'admin@local.host', 'password' : 'password', 'name' : 'saccharomyces_cerevisiae_READ'}"
+  "{'username' : 'admin@local.host', 'password' : 'password', 'name' : 'saccharomyces_cerevisiae_USER'}"
 curl -i -H 'Content-type: application/json' \
   -X POST http://127.0.0.1:8888/group/createGroup -d  \
   "{'username' : 'admin@local.host', 'password' : 'password', 'name' : 'saccharomyces_cerevisiae_WRITE'}"

@@ -61,10 +61,7 @@ function tripal_apollo_get_eligible_records() {
        * By default we can just use name.
        */
       case 'default':
-        $chado_record = chado_select_record($base, [
-          'name',
-        ], [$base_key => $record_id]);
-        $result = chado_select_record($base, [$base_key => $record_id]);
+        $result = chado_select_record($base,['name'], [$base_key => $record_id]);
         $result = $result[0];
         $out[$record_id] = $result->name;
         break;
@@ -193,11 +190,10 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
       " -fname " . $fname .
       " -lname " . $lname;
 
-    $exec_user = exec($command_base .
-      " -group " . $group_base . "_READ");
 
-    dpm($command_base .
-      " -group " . $group_base . "_READ");
+    //TODO: Make this configurable?
+    $exec_user = exec($command_base .
+      " -group " . $group_base . "_USER");
 
     $exec_user = exec($command_base .
       " -group " . $group_base . "_WRITE");

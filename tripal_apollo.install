@@ -403,7 +403,9 @@ function tripal_apollo_add_instance_user_organism_schemas($schema) {
 //        ->execute();
 //      }
 //
-//      //TODO: I need to use the web_apollo organism api to figure out which organism this is in chado unfortunately.
+//      //TODO: I need to use the web_apollo organism api to figure out which organism this is in chado unfortunately. Also chado_get_organism is tripal_get_organism in tripal 2 so if compatibility is an issue, use chado_get_record instead.
+//
+
 //      $organism_id = chado_get_organism(['organism_id' => "shoot i dont know, i have a string"]);
 //      //Add this organism instance
 //      db_insert('public.apollo_user_organism_instance')
