@@ -33,12 +33,23 @@ function tripal_apollo_admin_form($form, &$form_state)
 
     $encrypt = variable_get('tripal_apollo_encrypt');
 
+  if (function_exists('mcrypt_module_open')){
+
     $form['encrypt'] = [
-        '#type' => 'checkbox',
-        '#default_value' => $encrypt,
-        '#title' => "Encrypt Passwords",
-        '#description' => "Enable/disable encryption.  Please see <a href = ' https://www.drupal.org/project/encrypt f'>https://www.drupal.org/project/encrypt</a> for more information."
+      '#type' => 'checkbox',
+      '#default_value' => $encrypt,
+      '#title' => "Encrypt Passwords",
+      '#description' => "Enable/disable encryption.  Please see <a href = ' https://www.drupal.org/project/encrypt f'>https://www.drupal.org/project/encrypt</a> for more information."
     ];
+  }else {
+    $form['encrypt'] = [
+      '#type' => 'item',
+      '#title' => "Encrypt Passwords",
+      '#description' => "Encryption cannot be enabled until the encrypt module prerequesites are set up.  Mcrypt is not installed on this server.  Please see <a href = ' https://www.drupal.org/project/encrypt f'>https://www.drupal.org/project/encrypt</a> for more information."
+    ];
+
+  }
+
 
 
     $form['submit'] = [

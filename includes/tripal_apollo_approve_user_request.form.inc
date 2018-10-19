@@ -60,7 +60,7 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $submissio
     ];
   }
   else {
-    //todo: genercize to be any content type.
+    //todo: generecize to be any content type.
   }
 
   //Look up instance for this record
