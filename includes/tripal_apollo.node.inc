@@ -86,7 +86,7 @@ function apollo_instance_form($node, &$form_state) {
     '#title' => t("URL of Apollo Server"),
     '#required' => TRUE,
     '#default_value' => property_exists($node, 'url') ? $node->url : '',
-      '#description' => 'The apollo API URL.  This can be found at /WebServices/ on your apollo server.  A valid example is http://localhost:8888'
+    '#description' => 'The apollo API URL.  This can be found at /WebServices/ on your apollo server.  A valid example is http://localhost:8888',
   ];
 
 
@@ -108,6 +108,7 @@ function apollo_instance_form($node, &$form_state) {
     '#default_value' => property_exists($node, 'apollo_version') ? $node->apollo_version : NULL,
   ];
 
+  $selected =  isset($form_state['values']['apollo_version']) ? ($form_state['values']['apollo_version'])  : null ;
 
   $form['core']['database_name'] = [
     '#type' => 'textfield',
@@ -135,6 +136,33 @@ function apollo_instance_form($node, &$form_state) {
 
 
   $record_list = tripal_apollo_build_record_select();
+
+  $form['core']['apollo_1_multi'] = [
+    '#type' => 'fieldset',
+    '#states' => ['visible' => [
+      ## the states are what allow this fieldset to appear/disappear neatly without manual ajax
+      ':input[name="apollo_version"]' => ['value' => '1']
+    ]]
+  ];
+
+    $form['core']['apollo_1_multi']['text'] = [
+      '#type' => 'item',
+      '#title' => 'Multi-record Apollo 1 Support',
+      '#description' => 'Apollo 1 servers assume a single record/organism per instance.  If you select multiple organisms below, this module will assume that you have multiple Apollo 1 instances configured in the following manner:<p>
+
+url/[first three letters of genus][first three letters of species].
+
+</p>
+<p>
+If your URL is set as http://localhost:8000, and you select organisms acer saccharum & homo sapiens, for example, this Apollo 1 instance will connect to the following two apollo servers:
+<ul>
+<li>http://localhost:8000/acesac</li>
+<li>http://localhost:8000/homsap</li>
+</ul>
+</p>',
+      '#prefix' => '<div id="apollo-1-multi">',
+      '#suffix' => '</div>'
+    ];
 
 
   $form['core']['records'] = [
