@@ -176,7 +176,7 @@ function tripal_apollo_uninstall() {
 
   $query = new EntityFieldQuery();
   $query->entityCondition('entity_type', 'node')
-    ->entityCondition('bundle', 'apollo')
+    ->entityCondition('bundle', 'apollo_instance')
     // Restrict to Published nodes.
     ->propertyCondition('status', 1)
     // Restrict to nodes the current user has permission to view.
