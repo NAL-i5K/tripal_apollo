@@ -23,6 +23,12 @@ function tripal_apollo_admin_form($form, &$form_state)
         "analysis" => "analysis",
         "project" => "project"];
 
+    
+      $form['base_table_warning'] = [
+        '#markup' => '<h3>WARNING</h3><p>Changing the base table will wipe all of your instance-record and user-record configuration.  Change the base table with extreme caution.</p>'
+    ];
+
+    
     $form['base_table'] = [
         '#type' => 'select',
         '#default_value' => $table,
