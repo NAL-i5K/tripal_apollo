@@ -68,7 +68,7 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $submissio
   $query = db_select('apollo_instance_record', 'aio');
   $query->join('apollo_instance', 'ai', 'ai.id  = aio.instance_id');
   $query->fields('ai', ['name', 'id']);
-  $query->condition('aio.record_id', $record_object->$pkey);
+  $query->condition('aio.record_id', $data->record_id);
   $result = $query->execute()
     ->fetchObject();
 
