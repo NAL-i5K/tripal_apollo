@@ -227,3 +227,34 @@ function tripal_apollo_get_instance($instance_id) {
 //
 //  return $base_curl;
 //}
+
+
+/**
+ * builds the apollo 1 URL.  If its a multi-instance, we assume its url/genspec where genspec is first three letters of the genus and species.
+ * @param $url
+ * @param $record_id
+ * @param $instance_id
+ *
+ * @return mixed
+ */
+function tripal_apollo_one_build_url($url, $record_id, $instance_id){
+
+  $records = db_select('apollo_instance_record', 't')
+    ->fields('t')
+    ->condition('instance_id', $instance_id)
+    ->execute()
+    ->fetchAll();
+
+  if (count($records) < 2){
+    return $url;
+  }
+
+  $organism = chado_select_record('organism', ['genus', 'species'], ['organism_id' => $record_id]);
+  
+  $organism = $organism[0];
+
+  $url .= '/' . substr($organism->genus, 0, 2) . substr($organism-species, 0, 2);
+
+  return $url;
+
+}
