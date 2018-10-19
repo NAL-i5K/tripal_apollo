@@ -156,6 +156,7 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
     $script_path .= 'adduser.py';
 
     $db_name = $instance_info->database_name;
+    $host =  tripal_apollo_one_build_url($host, $record, $instance_info->id);
 
     $exec_user = exec($python_path . " " . $script_path .
       " -dbuser " . $admin_user .
@@ -250,7 +251,7 @@ function tripal_apollo_one_build_url($url, $record_id, $instance_id){
   }
 
   $organism = chado_select_record('organism', ['genus', 'species'], ['organism_id' => $record_id]);
-  
+
   $organism = $organism[0];
 
   $url .= '/' . substr($organism->genus, 0, 2) . substr($organism-species, 0, 2);
