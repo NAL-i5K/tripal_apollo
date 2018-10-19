@@ -61,7 +61,7 @@ function tripal_apollo_get_eligible_records() {
        * By default we can just use name.
        */
       case 'default':
-        $result = chado_select_record($base,['name'], [$base_key => $record_id]);
+        $result = chado_select_record($base, ['name'], [$base_key => $record_id]);
         $result = $result[0];
         $out[$record_id] = $result->name;
         break;
@@ -129,12 +129,18 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   $base = variable_get('tripal_apollo_base_table');
 
   if ($base == 'organism') {
-    $organism = chado_get_organism(['organism_id' => $record]);
+    $organism = chado_select_record('organism', [
+      'genus',
+      'species',
+    ], ['organism_id' => $record]);
+    $organism = $organism[0];
     $group_base = $organism->genus . '_' . $organism->species;
 
   }
   else {//todo: how would one want analysis or project supported?
-    $group_base = "some base";
+    $object = chado_select_record($base, ['name'], [$base . '_id' => $record]);
+    $object = $object[0];
+    $group_base = $object->name;
   }
 
 

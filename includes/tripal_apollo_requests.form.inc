@@ -55,7 +55,7 @@ function tripal_apollo_user_table() {
     'id',
     'record_id',
     'status',
-    'created'
+    'created',
   ]);
   $query->join('apollo_instance_record', 'air', 'air.record_id = aur.record_id');
 
@@ -89,7 +89,11 @@ function tripal_apollo_user_table() {
     //convert organism_id to organism name
     //TODO:  support multiple base tables
 
-    $organism = chado_get_organism(['organism_id' => $data->record_id]);
+    $record_object = chado_select_record('organism', [
+      'genus',
+      'species',
+    ], ['organism_id' => $data->record_id]);
+    $organism = $record_object[0];
 
     $organism_string = $organism->genus . ' ' . $organism->species;
 

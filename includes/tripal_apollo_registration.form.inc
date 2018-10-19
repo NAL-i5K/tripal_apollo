@@ -169,7 +169,12 @@ function tripal_apollo_registration_form_validate($form, &$form_state)
         $message = "You are already registered for the following organisms: ";
 
         foreach ($results as $key => $result) {
-            $organism = chado_get_organism(['organism_id' => $result->record_id]);
+
+
+          $record_object = chado_select_record('organism', [
+            'abbreviation',
+          ], ['organism_id' => $result->record_id]);
+          $organism = $record_object[0];
             $message .= $organism->abbreviation . ", ";
         }
         form_set_error('organism', $message);
