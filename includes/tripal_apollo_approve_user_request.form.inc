@@ -38,7 +38,14 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $submissio
 
   if (variable_get('tripal_apollo_base_table') == 'organism') {
     $pkey = "organism_id";
-    $record_object = chado_get_organism(['organism_id' => $data->record_id]);
+
+    $record_object = chado_select_record('organism', [
+      'abbreviation',
+      'common_name',
+      'genus',
+      'species',
+    ], ['organism_id' => $data->record_id]);
+    $record_object = $record_object[0];
 
     $organism_value = $record_object->abbreviation . ' (' . $record_object->common_name . ')';
 

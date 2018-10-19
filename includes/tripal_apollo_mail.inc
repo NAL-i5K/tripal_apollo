@@ -17,7 +17,12 @@ function tripal_apollo_mail($key, &$message, $params) {
     $i = 1;
     foreach ($params['organism'] as $organism_id) {
 
-      $abbreviation = chado_get_organism(['organism_id' => $organism_id])->abbreviation;
+
+      $record_object = chado_select_record('organism', [
+        'abbreviation',
+      ], ['organism_id' => $organism_id]);
+      $abbreviation = $record_object[0]->abbreviation;
+
       $organism_value .= $abbreviation . " ,";
       $i++;
     }
