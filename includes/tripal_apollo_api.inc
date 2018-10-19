@@ -145,7 +145,6 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   $script_path = drupal_get_path('module', 'tripal_apollo') . '/bin/';
 
   if ($instance_info->apollo_version === 1) {
-    //TODO: NOT SUPPORTED YET
     //Apollo 1 registration
 
     $script_path .= 'adduser.py';
@@ -159,23 +158,6 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
       " -user " . $user .
       " -pwd " . $user_pass .
       " -host " . $host);
-
-
-    // if apollo 1, we need to set the track level permissions
-
-
-    //Only on prod we have data for species seqids.txt files, but not on dev. change the seqids.txt file while testing on gmod-dev server
-    /*($organism_short_name == 'diacit')
-      $seqids = '/app/data/other_species/'.$organism_short_name.'/seqids/seqids.txt';
-    else
-      $seqids = '/app/data/BCM_i5k_pilot/'.$organism_short_name.'/seqids/seqids.txt';
-
-    $set_permissions =  shell_exec("perl set_track_permissions.pl -D ".$db_name." -U ".$db_user." -P ".$db_pass." -u ".$user." -t ".$seqids." -rw");
-    */
-
-    //DEVELOPMENT
-    // $set_permissions =  shell_exec("perl set_track_permissions.pl -D ".$db_name." -U ".$db_user." -P ".$db_pass." -u ".$user." -t trackseq.txt -rw");
-
   }
   else {
 
@@ -194,7 +176,6 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
     //TODO: Make this configurable?
     $exec_user = exec($command_base .
       " -group " . $group_base . "_USER");
-
     $exec_user = exec($command_base .
       " -group " . $group_base . "_WRITE");
     //Parameters not supplied:
