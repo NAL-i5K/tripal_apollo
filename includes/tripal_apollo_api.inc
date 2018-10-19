@@ -197,7 +197,7 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
       " -fname " . $fname .
       " -lname " . $lname .
     //TODO: Make this configurable?
-      " -group " . $group_base . "_WRITE");
+      " -group " . $group_base . "_WRITE";
     //Parameters not supplied:
     //metadata, token
   }
