@@ -48,6 +48,8 @@ Apollo 1 does not support a REST API.  Your Apollo 1 server's database must ther
 Site-wide settings can be set at `/admin/tripal_apollo`.  
 
 
+**Important notice!!!**  Switching base tables will **wipe all information linking instances to records and records to users**.  Be very mindful of changing this setting!
+
 ![admin area](docs/admin_area.png)
 
 Note that we encourage enabling encryption of passwords.  However, disabling encryption is provided in case of issues setting up the encryption module.
