@@ -100,7 +100,6 @@ function tripal_apollo_user_delete($form, &$form_state) {
   //API CALLs: delete user in all attached instances.
 
   if (!$result) {
-
     tripal_set_message('Error: could not delete user from Apollo instances', TRIPAL_ERROR);
   }
   //Now: delete all apollo_user based records.

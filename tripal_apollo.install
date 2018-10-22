@@ -17,8 +17,8 @@ function tripal_apollo_install() {
 
   variable_set('tripal_apollo_encrypt', FALSE);
 
-  if (function_exists('mcrypt_module_open')){
-  variable_set('tripal_apollo_encrypt', TRUE);
+  if (function_exists('mcrypt_module_open')) {
+    variable_set('tripal_apollo_encrypt', TRUE);
   }
 
 }
@@ -236,6 +236,14 @@ function tripal_apollo_add_instance_user_organism_schemas($schema) {
       'apollo_instance_record_uq1' => ['record_id'],
     ],
     'primary key' => ['id'],
+    'foreign keys' => [
+      'instance_id' => [
+        'table' => 'apollo_instance',
+        'columns' => [
+          'job_id' => 'id',
+        ],
+      ],
+    ],
   ];
 
 
@@ -274,6 +282,14 @@ function tripal_apollo_add_instance_user_organism_schemas($schema) {
     'primary_key' => ['id'],
     'unique keys' => [
       'apollo_user_record_u1' => ['record_id', 'apollo_user_id'],
+    ],
+    'foreign keys' => [
+      'apollo_user_id' => [
+        'table' => 'apollo_user',
+        'columns' => [
+          'job_id' => 'id',
+        ],
+      ],
     ],
   ];
 
@@ -330,6 +346,14 @@ function tripal_apollo_add_instance_user_organism_schemas($schema) {
       'email' => ['email'],
       'uid' => ['uid'],
 
+    ],
+    'foreign keys' => [
+      'uid' => [
+        'table' => 'users',
+        'columns' => [
+          'uid' => 'uid',
+        ],
+      ],
     ],
   ];
   return $schema;

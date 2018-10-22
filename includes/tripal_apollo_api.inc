@@ -332,8 +332,8 @@ function tripal_apollo_one_build_url($url, $record_id, $instance_id) {
  */
 function tripal_apollo_purge_user($auid) {
 
-  $query = db_select('apollo_user_record', 'aur')
-    ->condition('aur.apollo_user_id', $auid);
+  $query = db_select('apollo_user_record', 'aur');
+  $query->condition('aur.apollo_user_id', $auid);
   $query->join('apollo_user', 'au', 'aur.apollo_user_id = au.id');
   $query->fields('au', ['email']);
   $query->join('apollo_instance_record', 'air', 'air.record_id = aur.record_id');
@@ -341,6 +341,7 @@ function tripal_apollo_purge_user($auid) {
   $results = $query->execute();
 
   $path = '/user/deleteUser';
+
   foreach ($results as $result) {
 
     $instance = tripal_apollo_get_instance($result->instance_id);
@@ -360,7 +361,17 @@ function tripal_apollo_purge_user($auid) {
     ];
 
     $response = drupal_http_request($address, $options);
-
+    //error check here
+    if ($response->code != "200") {
+      tripal_log(t('Error: Bad response from Apollo instance !id, code: !code.  Message: !message', [
+        '!id' => $instance->id,
+        '!code' => $response->code,
+        '!message' => $response->error,
+      ]), TRIPAL_ERROR);
+      return FALSE;
+    }
   }
+
+  return TRUE;
 
 }

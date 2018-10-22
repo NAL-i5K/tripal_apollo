@@ -67,11 +67,12 @@ class tripal_apollo_api_Test extends TripalTestCase {
 
   public function test_tripal_apollo_purge_user() {
 
-    $url = 'localhost:8888';
+    $url = 'http://localhost:8888';
 
     $info = $this->add_user_with_permission();
 
     $auid = $info['apollo_user_id'];
+
 
     tripal_apollo_purge_user($auid);
 
@@ -99,7 +100,7 @@ class tripal_apollo_api_Test extends TripalTestCase {
 
   private function add_user_with_permission() {
 
-    $url = 'localhost:8888';
+    $url = 'http://localhost:8888';
 
     $info = tripal_apollo_configureApollo($url);
 
@@ -118,13 +119,16 @@ class tripal_apollo_api_Test extends TripalTestCase {
     ];
 
     $user = db_insert('apollo_user')
-      ->fields($user_info);
+      ->fields($user_info)
+    ->execute();
+
+    $aur = db_insert('apollo_user_record')
+      ->fields(['record_id' => $info['organism'], 'apollo_user_id' => $user,
+        'status' => '2'])
+      ->execute();
 
     $user_info['organism_key'] = $info['organism'];
-    //email
-    //name
-    //organism_key
-    //pass
+
     $curr_dir = getcwd();
 
     chdir(DRUPAL_ROOT);
@@ -132,7 +136,6 @@ class tripal_apollo_api_Test extends TripalTestCase {
     tripal_apollo_create_user_permissions($user_info, $instance_info);
 
     chdir($curr_dir);
-
 
     return ['apollo_user_id' => $user];
 
