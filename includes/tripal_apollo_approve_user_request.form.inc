@@ -192,6 +192,6 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
       ->execute();
     drupal_set_message(t('The apollo request for %name has been successfuly rejected.', ['%name' => $values['name']]), $type = 'status');
   }
-  $form_state['redirect'] = 'admin/tripal/apollo/users';
+  $form_state['redirect'] = 'admin/tripal/apollo/requests';
   return;
 }

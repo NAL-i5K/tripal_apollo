@@ -56,6 +56,7 @@ function tripal_apollo_user_table() {
     'record_id',
     'status',
     'created',
+    'apollo_user_id'
   ]);
   $query->join('apollo_instance_record', 'air', 'air.record_id = aur.record_id');
 
@@ -76,7 +77,7 @@ function tripal_apollo_user_table() {
     ["data" => t('Record'), "field" => "record_id"],
     ["data" => t('Status'), "field" => "status"],
     ["data" => t('Created'), "field" => "created", 'sort' => 'desc'],
-    [],
+    ["data" => t('Action'), "field" => 'action'],
   ];
 
   // Now build the form array
@@ -98,7 +99,10 @@ function tripal_apollo_user_table() {
     $organism_string = $organism->genus . ' ' . $organism->species;
 
     // Fill the table rows
-    $rows[$i][] = $data->name;
+    $user_apollo_id = $data->apollo_user_id;
+
+    $path = '/admin/tripal/apollo/users/' . $user_apollo_id;
+    $rows[$i][] = l($data->name, $path);
     $rows[$i][] = $data->email;
     $rows[$i][] = $organism_string;
     $status = '';
@@ -113,7 +117,7 @@ function tripal_apollo_user_table() {
     }
     $rows[$i][] = $status;
     $rows[$i][] = date('M d Y h:i:s A', $data->created);
-    $rows[$i][] = l(t('Edit'), 'admin/tripal/apollo/users/' . $data->id);
+    $rows[$i][] = l(t('Approve/Deny Request'), 'admin/tripal/apollo/requests/' . $data->id);
     $i++;
   }
 

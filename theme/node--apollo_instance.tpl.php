@@ -108,6 +108,10 @@
                 <th>Apollo Version</th>
                 <td><?php print $node->apollo_version; ?></td>
             </tr>
+            <tr>
+                <th>Number of Users</th>
+                <td><?php print count($node->users); ?></td>
+            </tr>
         </table>
       <?php
       // Add in any remaining content
