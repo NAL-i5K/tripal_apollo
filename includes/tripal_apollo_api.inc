@@ -194,6 +194,50 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
 }
 
 /**
+ * Given an instance_id, return all users for that instance as an array of objects using the loadUsers API.
+ * Apollo 2 only.
+ * @param $instance_id
+ * @param null $user_id
+ *
+ * @return array|bool|mixed
+ */
+function tripal_apollo_get_users($instance_id, $user_id = NULL){
+
+  $instance = tripal_apollo_get_instance($instance_id);
+  $path = '/user/loadUsers';
+  $address = $instance->url . $path;
+  $password = tripal_apollo_decrypt($instance->admin_password);
+  $method = 'POST';
+  $data = ['username' => $instance->admin_name, 'password' => $password];
+  if ($user_id){
+    //TODO: convert to apollo user id.
+    $data['userId']  = $user_id;
+  }
+
+  $headers = ['Content-Type' => 'application/json'];
+
+  $options = ['headers' => $headers,
+    'method' => $method,
+    'data' => json_encode($data)];
+
+  $response = drupal_http_request($address, $options);
+
+
+  //TODO: error check
+
+  if (!isset($response->data)){
+    return FALSE;
+  }
+
+  $data = $response->data;
+
+  $data = json_decode($data);
+
+  return $data;
+
+}
+
+/**
  * fetch an apollo object with the instance id
  *
  * @param $instance_id
