@@ -29,7 +29,7 @@ An email is sent to the user and the site admin email notifying them of the requ
 
 ### Approving/denying requests
 
-Registration requests appear at `admin/tripal/apollo/users`.
+Registration requests appear at `admin/tripal/apollo/requests`.
 
 Each row is for a single user - organism request pairing, so a single form submission may consist of several rows.  The admin can click the "edit" button to view the request, which will list the user name, email, organism.  To approve or reject the request, check the appropriate box and click **Save**.
 .

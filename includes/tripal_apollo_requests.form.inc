@@ -113,7 +113,7 @@ function tripal_apollo_user_table() {
     }
     $rows[$i][] = $status;
     $rows[$i][] = date('M d Y h:i:s A', $data->created);
-    $rows[$i][] = l(t('Edit'), 'admin/tripal/apollo/users/' . $data->id);
+    $rows[$i][] = l(t('Edit'), 'admin/tripal/apollo/requests/' . $data->id);
     $i++;
   }
 
