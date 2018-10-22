@@ -330,20 +330,37 @@ function tripal_apollo_one_build_url($url, $record_id, $instance_id) {
 /**
  * @param $auid apollo user id
  */
-function tripal_apollo_purge_user($auid){
+function tripal_apollo_purge_user($auid) {
 
   $query = db_select('apollo_user_record', 'aur')
     ->condition('aur.apollo_user_id', $auid);
+  $query->join('apollo_user', 'au', 'aur.apollo_user_id = au.id');
+  $query->fields('au', ['email']);
   $query->join('apollo_instance_record', 'air', 'air.record_id = aur.record_id');
   $query->fields('air', ['instance_id']);
   $results = $query->execute();
 
-  foreach($results as $result){
+  $path = '/user/deleteUser';
+  foreach ($results as $result) {
 
     $instance = tripal_apollo_get_instance($result->instance_id);
+    $password = tripal_apollo_decrypt($instance->admin_password);
+    $address = $instance->url . $path;
 
-    
+    $headers = ['Content-Type' => 'application/json'];
+    $method = 'POST';
+    $data = ['username' => $instance->admin_name, 'password' => $password];
+
+    $data['userToDelete'] = $result->email;
+
+    $options = [
+      'headers' => $headers,
+      'method' => $method,
+      'data' => json_encode($data),
+    ];
+
+    $response = drupal_http_request($address, $options);
+
   }
-
 
 }
