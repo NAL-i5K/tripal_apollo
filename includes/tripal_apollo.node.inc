@@ -335,6 +335,9 @@ function apollo_instance_load($nodes) {
     $nodes[$record->nid]->url = $record->url;
     $nodes[$record->nid]->apollo_version = $record->apollo_version;
     $nodes[$record->nid]->title = $record->name;
+    //get user info
+    $users = tripal_apollo_get_users($record->id);
+    $nodes[$record->nid]->users = $users;
   }
 
   return $nodes;

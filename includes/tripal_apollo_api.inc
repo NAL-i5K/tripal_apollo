@@ -156,7 +156,7 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
     $script_path .= 'adduser.py';
 
     $db_name = $instance_info->database_name;
-    $host =  tripal_apollo_one_build_url($host, $record, $instance_info->id);
+    $host = tripal_apollo_one_build_url($host, $record, $instance_info->id);
 
     $exec_user = exec($python_path . " " . $script_path .
       " -dbuser " . $admin_user .
@@ -194,14 +194,16 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
 }
 
 /**
- * Given an instance_id, return all users for that instance as an array of objects using the loadUsers API.
- * Apollo 2 only.
+ * Given an instance_id, return all users for that instance as an array of
+ * objects using the loadUsers API. Apollo 2 only.
+ *
  * @param $instance_id
- * @param null $user_id
+ * @param null $user_id .  If a user_id is given, return that user only.
+ * this is the apollo_user.id field.
  *
  * @return array|bool|mixed
  */
-function tripal_apollo_get_users($instance_id, $user_id = NULL){
+function tripal_apollo_get_users($instance_id, $user_id = NULL) {
 
   $instance = tripal_apollo_get_instance($instance_id);
   $path = '/user/loadUsers';
@@ -209,32 +211,48 @@ function tripal_apollo_get_users($instance_id, $user_id = NULL){
   $password = tripal_apollo_decrypt($instance->admin_password);
   $method = 'POST';
   $data = ['username' => $instance->admin_name, 'password' => $password];
-  if ($user_id){
+  if ($user_id) {
     //TODO: convert to apollo user id.
-    $data['userId']  = $user_id;
+
+    $user_mail = db_select('apollo_user', 't')->fields('t', ['email'])
+      ->condition('id', $user_id)->execute()
+      ->fetchObject();
+    if (!$user_mail) {
+      tripal_set_message('User ID not found', TRIPAL_ERROR);
+      return FALSE;
+    }
+    $data['userId'] = $user_mail;
   }
 
   $headers = ['Content-Type' => 'application/json'];
 
-  $options = ['headers' => $headers,
+  $options = [
+    'headers' => $headers,
     'method' => $method,
-    'data' => json_encode($data)];
+    'data' => json_encode($data),
+  ];
 
   $response = drupal_http_request($address, $options);
 
 
   //TODO: error check
 
-  if (!isset($response->data)){
+  if (!isset($response->data)) {
+    tripal_set_message('Connection error', TRIPAL_ERROR);
     return FALSE;
   }
 
-  $data = $response->data;
+  //remove admin user
 
-  $data = json_decode($data);
+  $data = json_decode($response->data);
+
+  foreach ($data as $user_number => $user) {
+    if ($user->role === 'ADMIN') {
+      unset($data[$user_number]);
+    }
+  }
 
   return $data;
-
 }
 
 /**
@@ -275,14 +293,16 @@ function tripal_apollo_get_instance($instance_id) {
 
 
 /**
- * builds the apollo 1 URL.  If its a multi-instance, we assume its url/genspec where genspec is first three letters of the genus and species.
+ * builds the apollo 1 URL.  If its a multi-instance, we assume its url/genspec
+ * where genspec is first three letters of the genus and species.
+ *
  * @param $url
  * @param $record_id
  * @param $instance_id
  *
  * @return mixed
  */
-function tripal_apollo_one_build_url($url, $record_id, $instance_id){
+function tripal_apollo_one_build_url($url, $record_id, $instance_id) {
 
   $records = db_select('apollo_instance_record', 't')
     ->fields('t')
@@ -290,15 +310,18 @@ function tripal_apollo_one_build_url($url, $record_id, $instance_id){
     ->execute()
     ->fetchAll();
 
-  if (count($records) < 2){
+  if (count($records) < 2) {
     return $url;
   }
 
-  $organism = chado_select_record('organism', ['genus', 'species'], ['organism_id' => $record_id]);
+  $organism = chado_select_record('organism', [
+    'genus',
+    'species',
+  ], ['organism_id' => $record_id]);
 
   $organism = $organism[0];
 
-  $url .= '/' . substr($organism->genus, 0, 2) . substr($organism-species, 0, 2);
+  $url .= '/' . substr($organism->genus, 0, 2) . substr($organism - species, 0, 2);
 
   return $url;
 
