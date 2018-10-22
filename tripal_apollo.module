@@ -70,25 +70,27 @@ function tripal_apollo_menu() {
     'weight' => 8,
     'access arguments' => array('administer apollo users'),
   );
-  
 
-  $items['admin/tripal/apollo/users'] = [
-    'title' => 'Apollo User Administration',
-    'description' => 'List of Apollo users.',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => ['tripal_apollo_users_table'],
-    'access arguments' => ['administer apollo users'],
-    'file' => 'includes/tripal_apollo_users_table.inc',
-  ];
+
+//  $items['admin/tripal/apollo/users'] = [
+//    'title' => 'Apollo User Administration',
+//    'description' => 'List of Apollo users.',
+//    'page callback' => 'drupal_get_form',
+//    'page arguments' => ['tripal_apollo_users_table'],
+//    'access arguments' => ['administer apollo users'],
+//    'file' => 'includes/tripal_apollo_users_table.inc',
+//  ];
 
 
   $items['admin/tripal/apollo/users/%'] = [
     'title' => 'Apollo User Administration',
     'description' => 'Manage an individual Apollo User record',
     'page callback' => 'drupal_get_form',
-    'page arguments' => ['tripal_apollo_user_form'],
+    'page arguments' => ['tripal_apollo_user_form', 4],
     'access arguments' => ['administer apollo users'],
     'file' => 'includes/tripal_apollo_user.form.inc',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
   ];
 
 
@@ -99,6 +101,7 @@ function tripal_apollo_menu() {
     'page arguments' => ['tripal_apollo_requests_form'],
     'access arguments' => ['administer apollo users'],
     'file' => 'includes/tripal_apollo_requests.form.inc',
+    'type' => MENU_NORMAL_ITEM,
   ];
 
   $items['admin/tripal/apollo/requests/%'] = [
@@ -117,6 +120,7 @@ function tripal_apollo_menu() {
     'page arguments' => ['tripal_apollo_admin_form'],
     'access arguments' => ['administer web-apollo'],
     'file' => 'includes/tripal_apollo_admin_form.inc',
+    'type' => MENU_NORMAL_ITEM,
   ];
 
   return $items;
