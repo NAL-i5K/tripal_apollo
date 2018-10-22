@@ -326,3 +326,24 @@ function tripal_apollo_one_build_url($url, $record_id, $instance_id) {
   return $url;
 
 }
+
+/**
+ * @param $auid apollo user id
+ */
+function tripal_apollo_purge_user($auid){
+
+  $query = db_select('apollo_user_record', 'aur')
+    ->condition('aur.apollo_user_id', $auid);
+  $query->join('apollo_instance_record', 'air', 'air.record_id = aur.record_id');
+  $query->fields('air', ['instance_id']);
+  $results = $query->execute();
+
+  foreach($results as $result){
+
+    $instance = tripal_apollo_get_instance($result->instance_id);
+
+    
+  }
+
+
+}

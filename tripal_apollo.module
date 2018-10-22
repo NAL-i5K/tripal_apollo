@@ -64,33 +64,10 @@ function tripal_apollo_menu() {
     'file' => 'includes/tripal_apollo_registration.form.inc',
   ];
 
-  $items['admin/tripal/apollo'] = array(
+  $items['admin/tripal/apollo'] = [
     'title' => 'Tripal Apollo',
     'description' => t("Tripal Apollo connects your tripal content, and Drupal users, to one or more Apollo servers."),
-    'weight' => 8,
-    'access arguments' => array('administer apollo users'),
-  );
-
-
-//  $items['admin/tripal/apollo/users'] = [
-//    'title' => 'Apollo User Administration',
-//    'description' => 'List of Apollo users.',
-//    'page callback' => 'drupal_get_form',
-//    'page arguments' => ['tripal_apollo_users_table'],
-//    'access arguments' => ['administer apollo users'],
-//    'file' => 'includes/tripal_apollo_users_table.inc',
-//  ];
-
-
-  $items['admin/tripal/apollo/users/%'] = [
-    'title' => 'Apollo User Administration',
-    'description' => 'Manage an individual Apollo User record',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => ['tripal_apollo_user_form', 4],
     'access arguments' => ['administer apollo users'],
-    'file' => 'includes/tripal_apollo_user.form.inc',
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
   ];
 
 
@@ -108,6 +85,7 @@ function tripal_apollo_menu() {
     'title' => 'Approve or Reject the user request for web apollo account',
     'page callback' => 'drupal_get_form',
     'page arguments' => ['tripal_apollo_approve_user_request_form', 4],
+    'access arguments' => ['administer apollo users'],
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'includes/tripal_apollo_approve_user_request.form.inc',
@@ -118,10 +96,22 @@ function tripal_apollo_menu() {
     'description' => 'Configure sitewide Apollo settings',
     'page callback' => 'drupal_get_form',
     'page arguments' => ['tripal_apollo_admin_form'],
-    'access arguments' => ['administer web-apollo'],
+    'access arguments' => ['administer tripal apollo'],
     'file' => 'includes/tripal_apollo_admin_form.inc',
     'type' => MENU_NORMAL_ITEM,
   ];
+
+  $items['admin/tripal/apollo/users/%'] = [
+    'title' => 'Apollo User Administration',
+    'description' => 'Manage an individual Apollo User record',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => ['tripal_apollo_user_form', 4],
+    'access arguments' => ['administer apollo users'],
+    'file' => 'includes/tripal_apollo_user.form.inc',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  ];
+
 
   return $items;
 }
