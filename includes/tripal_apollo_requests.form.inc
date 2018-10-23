@@ -4,17 +4,23 @@
  * Builds the user request table for admin to approve/reject.
  * Implements hook_form().
  */
-function tripal_apollo_requests_form($form, &$form_state) {
-  $user_info = tripal_apollo_user_table();
+function tripal_apollo_requests_form($form, &$form_state, $type = NULL) {
+
+  $user_info = tripal_apollo_user_table($type);
   $form['users'] = ['#markup' => $user_info];
   return $form;
 }
+
 
 /**
  * List the web apollo registered users with pagination and
  * with Approve/Reject options
  **/
-function tripal_apollo_user_table() {
+function tripal_apollo_user_table($type) {
+
+  $type_convert = ["approved" => 1, "denied" => 0, "pending" => 2];
+
+
   $output = "";
 
   if (isset($_GET['sort']) && isset($_GET['order'])) {
@@ -58,6 +64,14 @@ function tripal_apollo_user_table() {
     'created',
     'apollo_user_id'
   ]);
+
+  if ($type != "all"){
+
+
+    $check = $type_convert[$type];
+
+    $query->condition('status', $check);
+  }
   $query->join('apollo_instance_record', 'air', 'air.record_id = aur.record_id');
 
   $query->fields('air', [
@@ -131,7 +145,7 @@ function tripal_apollo_user_table() {
         // Table header will be sticky
         "caption" => "",
         "colgroups" => [],
-        "empty" => t("There are no Apollo registration requests.")
+        "empty" => t("There are no requests.")
         // The message to be displayed if table is empty
       ]
     ) . theme("pager");
