@@ -235,10 +235,8 @@ function tripal_apollo_get_users($instance_id, $user_id = NULL) {
   $response = drupal_http_request($address, $options);
 
 
-  //TODO: error check
-
   if (!isset($response->data)) {
-    tripal_set_message('Connection error', TRIPAL_ERROR);
+    tripal_set_message(t('Connection error for Apollo instance: !name', ['!name' => $instance->name]), TRIPAL_ERROR);
     return FALSE;
   }
 

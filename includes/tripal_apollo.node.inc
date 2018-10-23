@@ -108,7 +108,7 @@ function apollo_instance_form($node, &$form_state) {
     '#default_value' => property_exists($node, 'apollo_version') ? $node->apollo_version : NULL,
   ];
 
-  $selected =  isset($form_state['values']['apollo_version']) ? ($form_state['values']['apollo_version'])  : null ;
+  $selected = isset($form_state['values']['apollo_version']) ? ($form_state['values']['apollo_version']) : NULL;
 
   $form['core']['database_name'] = [
     '#type' => 'textfield',
@@ -139,16 +139,18 @@ function apollo_instance_form($node, &$form_state) {
 
   $form['core']['apollo_1_multi'] = [
     '#type' => 'fieldset',
-    '#states' => ['visible' => [
-      ## the states are what allow this fieldset to appear/disappear neatly without manual ajax
-      ':input[name="apollo_version"]' => ['value' => '1']
-    ]]
+    '#states' => [
+      'visible' => [
+        ## the states are what allow this fieldset to appear/disappear neatly without manual ajax
+        ':input[name="apollo_version"]' => ['value' => '1'],
+      ],
+    ],
   ];
 
-    $form['core']['apollo_1_multi']['text'] = [
-      '#type' => 'item',
-      '#title' => 'Multi-record Apollo 1 Support',
-      '#description' => 'Apollo 1 servers assume a single record/organism per instance.  If you select multiple organisms below, this module will assume that you have multiple Apollo 1 instances configured in the following manner:<p>
+  $form['core']['apollo_1_multi']['text'] = [
+    '#type' => 'item',
+    '#title' => 'Multi-record Apollo 1 Support',
+    '#description' => 'Apollo 1 servers assume a single record/organism per instance.  If you select multiple organisms below, this module will assume that you have multiple Apollo 1 instances configured in the following manner:<p>
 
 url/[first three letters of genus][first three letters of species].
 
@@ -160,9 +162,9 @@ If your URL is set as http://localhost:8000, and you select organisms acer sacch
 <li>http://localhost:8000/homsap</li>
 </ul>
 </p>',
-      '#prefix' => '<div id="apollo-1-multi">',
-      '#suffix' => '</div>'
-    ];
+    '#prefix' => '<div id="apollo-1-multi">',
+    '#suffix' => '</div>',
+  ];
 
 
   $form['core']['records'] = [
@@ -337,6 +339,10 @@ function apollo_instance_load($nodes) {
     $nodes[$record->nid]->title = $record->name;
     //get user info
     $users = tripal_apollo_get_users($record->id);
+    $nodes[$record->nid]->connection_error = FALSE;
+    if ($users === FALSE) {
+      $nodes[$record->nid]->connection_error = TRUE;
+    }
     $nodes[$record->nid]->users = $users;
   }
 
