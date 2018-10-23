@@ -3,7 +3,7 @@
 
  function tripal_apollo_configureApollo($url) {
 
-  //First delete an existing instance since the url is unique.
+  //Ffirst delete an existing instance since the url is unique.
   $check = db_select('apollo_instance', 't')
     ->fields('t', ['id'])
     ->condition('url', $url)
@@ -21,7 +21,7 @@
     ->condition('genus', 'saccharomyces')
     ->condition('species', 'cerevisiae')
     ->execute()
-    ->fetchObject();
+    ->fetchField();
 
   if (!$organism_id){
     $organism = factory('chado.organism')->create([
@@ -31,7 +31,6 @@
       'common_name' => 'yeast'
     ]);
     $organism_id = $organism->organism_id;
-
   }
 
   $values = [
@@ -44,8 +43,7 @@
     'admin_password' => 'password',
     'records' => [$organism_id]
   ];
-
-  $node = new \stdClass();
+   $node = new \stdClass();
 
   $node->type = 'apollo_instance';
   node_object_prepare($node);
@@ -58,5 +56,5 @@
   $node = node_submit($node);
   node_save($node);
 
-  return ['organism' => $organism_id];
+   return ['organism' => $organism_id];
 }

@@ -42,7 +42,8 @@ class tripal_apollo_api_Test extends TripalTestCase {
 
     $url = 'http://localhost:8888';
 
-    $info = tripal_apollo_configureApollo($url);
+    $this->add_user_with_permission();
+
 
     $instance = db_select('apollo_instance', 't')
       ->fields('t')
@@ -50,7 +51,9 @@ class tripal_apollo_api_Test extends TripalTestCase {
       ->execute()
       ->fetchObject();
 
+
     $users = tripal_apollo_get_users($instance->id);
+
 
     $this->assertNotEmpty($users);
 
@@ -66,12 +69,21 @@ class tripal_apollo_api_Test extends TripalTestCase {
     $this->assertNotNull($target_user);
     $this->assertEquals('testaberger', $target_user->lastName);
 
-
-    $user_info = db_select('apollo_user', 't')->fields('t')->condition('email', 'this_email_shouldnt_exist@never_gonna_happen.com')->execute()->fetchObject();
+    $user_info = db_select('apollo_user', 't')
+      ->fields('t')
+      ->condition('email', 'this_email_shouldnt_exist@never_gonna_happen.com')
+      ->execute()
+      ->fetchObject();
 
     $users = tripal_apollo_get_users($instance->id, $user_info->id);
 
-    var_dump($users);
+    $this->assertNotEmpty($users);
+
+    $user = array_shift($users);
+
+    $this->assertEquals('testaberger', $user->lastName, "Error retrieving a specific user");
+
+
   }
 
   public function test_tripal_apollo_purge_user() {
@@ -82,9 +94,9 @@ class tripal_apollo_api_Test extends TripalTestCase {
 
     $auid = $info['apollo_user_id'];
 
+    $response = tripal_apollo_purge_user($auid);
 
-    tripal_apollo_purge_user($auid);
-
+    $this->assertTrue($response, 'purge user API returned error');
 
     $instance = db_select('apollo_instance', 't')
       ->fields('t')
@@ -93,7 +105,6 @@ class tripal_apollo_api_Test extends TripalTestCase {
       ->fetchObject();
 
     $users = tripal_apollo_get_users($instance->id);
-
 
     $has_user = FALSE;
 
@@ -127,13 +138,17 @@ class tripal_apollo_api_Test extends TripalTestCase {
       'institution' => "U of Tripal",
     ];
 
+
     $user = db_insert('apollo_user')
       ->fields($user_info)
-    ->execute();
+      ->execute();
 
     $aur = db_insert('apollo_user_record')
-      ->fields(['record_id' => $info['organism'], 'apollo_user_id' => $user,
-        'status' => '2'])
+      ->fields([
+        'record_id' => $info['organism'],
+        'apollo_user_id' => $user,
+        'status' => '2',
+      ])
       ->execute();
 
     $user_info['apollo_user_id'] = $user;
@@ -141,6 +156,7 @@ class tripal_apollo_api_Test extends TripalTestCase {
     $user_info['organism_key'] = $info['organism'];
 
     $curr_dir = getcwd();
+
 
     chdir(DRUPAL_ROOT);
 
