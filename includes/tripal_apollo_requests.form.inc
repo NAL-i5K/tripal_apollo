@@ -18,7 +18,7 @@ function tripal_apollo_requests_form($form, &$form_state, $type = NULL) {
  **/
 function tripal_apollo_user_table($type) {
 
-  $type_convert = ["approved" => 1, "denied" => 0, "pending" => 2];
+  $type_convert = ["approved" => 1, "rejected" => 0, "pending" => 2];
 
 
   $output = "";
