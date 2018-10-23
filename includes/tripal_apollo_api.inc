@@ -117,6 +117,7 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   $admin_user = $instance_info->admin_name;
   $host = $instance_info->url;
 
+  $apollo_user_id = $values['apollo_user_id'];
 
   $user = $values['email'];
   $name = explode(" ", $values['name'], 2);
@@ -135,14 +136,12 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
     ], ['organism_id' => $record]);
     $organism = $organism[0];
     $group_base = $organism->genus . '_' . $organism->species;
-
   }
   else {//todo: how would one want analysis or project supported?
     $object = chado_select_record($base, ['name'], [$base . '_id' => $record]);
     $object = $object[0];
     $group_base = $object->name;
   }
-
 
   $user_pass = tripal_apollo_decrypt($values['pass']);
 
@@ -168,29 +167,117 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   }
   else {
 
-    $script_path .= 'add_user2.py';
-
-    $command_base = $python_path . " " . $script_path .
-      " -dbuser " . $admin_user .
-      " -dbpass " . $admin_pass .
-      " -user " . $user .
-      " -pwd " . $user_pass .
-      " -host " . $host .
-      " -fname " . $fname .
-      " -lname " . $lname;
+    //create/get user
 
 
-    //TODO: Make this configurable?
-    $exec_user = exec($command_base .
-      " -group " . $group_base . "_USER");
-    $exec_user = exec($command_base .
-      " -group " . $group_base . "_WRITE");
-    //Parameters not supplied:
-    //metadata, token
+    $user = tripal_apollo_get_users($instance_info->id, $apollo_user_id);
+
+    if (!$user) {
+      $user = tripal_apollo_add_user($instance_info->id, $apollo_user_id);
+    }
+
+    var_dump($user);
+
+    //add user to group 1
+
+    tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_base . '_USER');
+
+
+    tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_base . '_WRITE');
+
+    //add user to group 2
+
+
+    $path = '/user/loadUsers';
+    $address = $instance_info->url . $path;
+    $password = tripal_apollo_decrypt($instance_info->admin_password);
+    $method = 'POST';
+    $data = ['username' => $instance_info->admin_name, 'password' => $password];
+
+
+    $headers = ['Content-Type' => 'application/json'];
+
+    $options = [
+      'headers' => $headers,
+      'method' => $method,
+      'data' => json_encode($data),
+    ];
+
+    $response = drupal_http_request($address, $options);
+
+
+    if (!isset($response->data)) {
+      tripal_set_message(t('Connection error for Apollo instance: !name', ['!name' => $instance_info->name]), TRIPAL_ERROR);
+      return FALSE;
+    }
   }
+  //
+  //
+  //    $script_path .= 'add_user2.py';
+  //
+  //    $command_base = $python_path . " " . $script_path .
+  //      " -dbuser " . $admin_user .
+  //      " -dbpass " . $admin_pass .
+  //      " -user " . $user .
+  //      " -pwd " . $user_pass .
+  //      " -host " . $host .
+  //      " -fname " . $fname .
+  //      " -lname " . $lname;
+  //
+  //
+  //    //TODO: Make this configurable?
+  //    $exec_user = exec($command_base .
+  //      " -group " . $group_base . "_USER");
+  //    $exec_user = exec($command_base .
+  //      " -group " . $group_base . "_WRITE");
+  //    //Parameters not supplied:
+  //    //metadata, token
 
 
   return TRUE;
+}
+
+
+function tripal_apollo_add_user($instance_id, $apollo_user_id, $role = 'USER') {
+
+
+  $user = db_select('apollo_user', 't')
+    ->fields('t')
+    ->condition('id', $apollo_user_id)
+    ->execute()
+    ->fetchObject();
+
+  $name = explode(" ", $user->name, 2);
+  $fname = $name[0];
+  $lname = isset($name[1]) ? $name[1] : $name[0];
+
+  $instance_info  = tripal_apollo_get_instance($instance_id);
+
+  $path = '/user/createUser';
+  $address = $instance_info->url . $path;
+  $password_admin = tripal_apollo_decrypt($instance_info->admin_password);
+  $password_user = tripal_apollo_decrypt($user->password);
+  $method = 'POST';
+  $data = ['username' => $instance_info->admin_name,
+    'password' => $password_admin,
+    'firstName' => $fname,
+    'lastName' => $lname,
+    'role' => $role,
+    'newPassword' => $password_user];
+
+
+  $headers = ['Content-Type' => 'application/json'];
+
+  $options = [
+    'headers' => $headers,
+    'method' => $method,
+    'data' => json_encode($data),
+  ];
+
+  $response = drupal_http_request($address, $options);
+
+  return $response;
+
 }
 
 /**

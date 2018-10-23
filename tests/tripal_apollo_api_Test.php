@@ -35,6 +35,9 @@ class tripal_apollo_api_Test extends TripalTestCase {
   }
 
 
+  /**
+   * @group wip
+   */
   public function test_tripal_apollo_get_users() {
 
     $url = 'http://localhost:8888';
@@ -63,6 +66,12 @@ class tripal_apollo_api_Test extends TripalTestCase {
     $this->assertNotNull($target_user);
     $this->assertEquals('testaberger', $target_user->lastName);
 
+
+    $user_info = db_select('apollo_user', 't')->fields('t')->condition('email', 'this_email_shouldnt_exist@never_gonna_happen.com')->execute()->fetchObject();
+
+    $users = tripal_apollo_get_users($instance->id, $user_info->id);
+
+    var_dump($users);
   }
 
   public function test_tripal_apollo_purge_user() {
@@ -126,6 +135,8 @@ class tripal_apollo_api_Test extends TripalTestCase {
       ->fields(['record_id' => $info['organism'], 'apollo_user_id' => $user,
         'status' => '2'])
       ->execute();
+
+    $user_info['apollo_user_id'] = $user;
 
     $user_info['organism_key'] = $info['organism'];
 

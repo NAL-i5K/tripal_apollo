@@ -138,9 +138,12 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $submissio
 function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
   $values = $form_state['values']['web_apollo_table'];
   $values['type'] = 1;
-  $status = $form_state['values']['web_apollo_table']['status'];//reject or approve
+  $status = $form_state['values']['web_apollo_table']['status'];
+  //reject or approve
   $submission_id = $form_state['values']['web_apollo_table']['uid'];
   //TODO: not actually uid.  this is the submission id
+  $values['apollo_user_id'] =$submission_id;
+
   $to = $values['email'];
   $from = variable_get('site_mail');
   $status_res = db_select('apollo_user_record', 'aur')
