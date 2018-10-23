@@ -3,5 +3,6 @@ description = Tripal-Apollo Integration
 package = Custom
 version = 1.0
 core = 7.x
-dependencies[] = tripal
+#dependencies[] = tripal
+#we dont declare this dependency so that the module can be tripal2/3 cross compatible.
 dependencies[] = encrypt
