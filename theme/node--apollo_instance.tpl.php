@@ -110,7 +110,14 @@
             </tr>
             <tr>
                 <th>Number of Users</th>
-                <td><?php print count($node->users); ?></td>
+                <td><?php
+
+                    if ($node->connection_error){
+                        print ("Connection Error!");
+                    }else {
+                      print count($node->users);
+                    }
+                  ?></td>
             </tr>
         </table>
       <?php
