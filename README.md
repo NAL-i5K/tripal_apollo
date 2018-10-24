@@ -98,7 +98,7 @@ tar -xvf example_data/yeast.tar.gz -C example_data/
 docker run -it -v ${PWD}/example_data/:/data  -p 8888:8080 quay.io/gmod/docker-apollo:2.1.0
 
 ## Set the APOLLO_URL variable.
-APOLLO_URL=localhost:8888
+APOLLO_URL=http://localhost:8888
 export APOLLO_URL
 
 /bin/bash setup/set_travis_apollo.sh

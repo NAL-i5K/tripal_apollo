@@ -177,7 +177,6 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
       $user = array_shift($user);
     }
 
-
     //add user to group 1
 
     //create the groups in case they dont exist
@@ -251,6 +250,7 @@ function tripal_apollo_add_user($instance_id, $apollo_user_id, $role = 'USER') {
   ];
 
 
+
   $headers = ['Content-Type' => 'application/json'];
 
   $options = [
@@ -258,6 +258,7 @@ function tripal_apollo_add_user($instance_id, $apollo_user_id, $role = 'USER') {
     'method' => $method,
     'data' => json_encode($data),
   ];
+
 
   $response = drupal_http_request($address, $options);
 
@@ -305,8 +306,6 @@ function tripal_apollo_get_users($instance_id, $user_id = NULL) {
   ];
 
   $response = drupal_http_request($address, $options);
-
-  var_dump($response);
 
   if (!isset($response->data)) {
     tripal_set_message(t('Connection error for Apollo instance: !name', ['!name' => $instance->name]), TRIPAL_ERROR);
