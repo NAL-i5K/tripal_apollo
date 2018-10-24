@@ -432,7 +432,6 @@ function tripal_apollo_purge_user($auid) {
 
     $response = drupal_http_request($address, $options);
 
-    var_dump($response);
     //error check here
     if ($response->code != "200") {
       tripal_log(t('Error: Bad response from Apollo instance !id, code: !code.  Message: !message', [
@@ -443,8 +442,6 @@ function tripal_apollo_purge_user($auid) {
       return FALSE;
     }
   }
-  return TRUE;
-
 }
 
 function tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_name) {
