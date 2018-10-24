@@ -183,9 +183,9 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
     //create the groups in case they dont exist
 
     //TODO:  it looks like this is a bad idea.  do it in tests instead?
-
-    tripal_apollo_create_group($instance_info->id, $group_base . '_USER');
-    tripal_apollo_create_group($instance_info->id, $group_base . '_WRITE');
+//
+//    tripal_apollo_create_group($instance_info->id, $group_base . '_USER');
+//    tripal_apollo_create_group($instance_info->id, $group_base . '_WRITE');
 
     tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_base . '_USER');
 
@@ -288,7 +288,7 @@ function tripal_apollo_get_users($instance_id, $user_id = NULL) {
 
     $user_mail = db_select('apollo_user', 't')->fields('t', ['email'])
       ->condition('id', $user_id)->execute()
-      ->fetchObject();
+      ->fetchField();
     if (!$user_mail) {
       tripal_set_message('User ID not found', TRIPAL_ERROR);
       return FALSE;
@@ -306,9 +306,6 @@ function tripal_apollo_get_users($instance_id, $user_id = NULL) {
 
   $response = drupal_http_request($address, $options);
 
-
-  var_dump($options);
-  var_dump($address);
   var_dump($response);
 
   if (!isset($response->data)) {
@@ -318,6 +315,7 @@ function tripal_apollo_get_users($instance_id, $user_id = NULL) {
 
   //remove admin user
 
+
   $data = json_decode($response->data);
 
   foreach ($data as $user_number => $user) {
@@ -325,7 +323,6 @@ function tripal_apollo_get_users($instance_id, $user_id = NULL) {
       unset($data[$user_number]);
     }
   }
-
   return $data;
 }
 
@@ -462,7 +459,6 @@ function tripal_apollo_purge_user($auid) {
 }
 
 function tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_name) {
-
 
   $user = db_select('apollo_user', 't')
     ->fields('t')
