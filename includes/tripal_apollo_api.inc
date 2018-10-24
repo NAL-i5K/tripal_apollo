@@ -117,6 +117,7 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   $admin_user = $instance_info->admin_name;
   $host = $instance_info->url;
 
+  $apollo_user_id = $values['apollo_user_id'];
 
   $user = $values['email'];
   $name = explode(" ", $values['name'], 2);
@@ -135,14 +136,12 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
     ], ['organism_id' => $record]);
     $organism = $organism[0];
     $group_base = $organism->genus . '_' . $organism->species;
-
   }
   else {//todo: how would one want analysis or project supported?
     $object = chado_select_record($base, ['name'], [$base . '_id' => $record]);
     $object = $object[0];
     $group_base = $object->name;
   }
-
 
   $user_pass = tripal_apollo_decrypt($values['pass']);
 
@@ -168,29 +167,102 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   }
   else {
 
-    $script_path .= 'add_user2.py';
-
-    $command_base = $python_path . " " . $script_path .
-      " -dbuser " . $admin_user .
-      " -dbpass " . $admin_pass .
-      " -user " . $user .
-      " -pwd " . $user_pass .
-      " -host " . $host .
-      " -fname " . $fname .
-      " -lname " . $lname;
+    //create/get user
 
 
-    //TODO: Make this configurable?
-    $exec_user = exec($command_base .
-      " -group " . $group_base . "_USER");
-    $exec_user = exec($command_base .
-      " -group " . $group_base . "_WRITE");
-    //Parameters not supplied:
-    //metadata, token
+    $user = tripal_apollo_get_users($instance_info->id, $apollo_user_id);
+
+    if (!$user) {
+      $user = tripal_apollo_add_user($instance_info->id, $apollo_user_id);
+      $user = array_shift($user);
+    }
+
+
+    //add user to group 1
+
+    //create the groups in case they dont exist
+
+    //TODO:  it looks like this is a bad idea.  do it in tests instead?
+
+    tripal_apollo_create_group($instance_info->id, $group_base . '_USER');
+    tripal_apollo_create_group($instance_info->id, $group_base . '_WRITE');
+
+    tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_base . '_USER');
+
+
+    tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_base . '_WRITE');
+
   }
+  //
+  //
+  //    $script_path .= 'add_user2.py';
+  //
+  //    $command_base = $python_path . " " . $script_path .
+  //      " -dbuser " . $admin_user .
+  //      " -dbpass " . $admin_pass .
+  //      " -user " . $user .
+  //      " -pwd " . $user_pass .
+  //      " -host " . $host .
+  //      " -fname " . $fname .
+  //      " -lname " . $lname;
+  //
+  //
+  //    //TODO: Make this configurable?
+  //    $exec_user = exec($command_base .
+  //      " -group " . $group_base . "_USER");
+  //    $exec_user = exec($command_base .
+  //      " -group " . $group_base . "_WRITE");
+  //    //Parameters not supplied:
+  //    //metadata, token
 
 
   return TRUE;
+}
+
+
+function tripal_apollo_add_user($instance_id, $apollo_user_id, $role = 'USER') {
+
+
+  $user = db_select('apollo_user', 't')
+    ->fields('t')
+    ->condition('id', $apollo_user_id)
+    ->execute()
+    ->fetchObject();
+
+  $name = explode(" ", $user->name, 2);
+  $fname = $name[0];
+  $lname = isset($name[1]) ? $name[1] : $name[0];
+
+  $instance_info = tripal_apollo_get_instance($instance_id);
+
+  $path = '/user/createUser';
+  $address = $instance_info->url . $path;
+  $password_admin = tripal_apollo_decrypt($instance_info->admin_password);
+  $password_user = tripal_apollo_decrypt($user->pass);
+  $method = 'POST';
+  $data = [
+    'username' => $instance_info->admin_name,
+    'password' => $password_admin,
+    'firstName' => $fname,
+    'lastName' => $lname,
+    'role' => $role,
+    'email' => $user->email,
+    'newPassword' => $password_user,
+  ];
+
+
+  $headers = ['Content-Type' => 'application/json'];
+
+  $options = [
+    'headers' => $headers,
+    'method' => $method,
+    'data' => json_encode($data),
+  ];
+
+  $response = drupal_http_request($address, $options);
+
+  return array_shift($response);
+
 }
 
 /**
@@ -234,8 +306,8 @@ function tripal_apollo_get_users($instance_id, $user_id = NULL) {
 
   $response = drupal_http_request($address, $options);
 
-
   if (!isset($response->data)) {
+    var_dump($options);
     tripal_set_message(t('Connection error for Apollo instance: !name', ['!name' => $instance->name]), TRIPAL_ERROR);
     return FALSE;
   }
@@ -338,6 +410,7 @@ function tripal_apollo_purge_user($auid) {
   $query->fields('air', ['instance_id']);
   $results = $query->execute();
 
+
   $path = '/user/deleteUser';
 
   foreach ($results as $result) {
@@ -349,7 +422,6 @@ function tripal_apollo_purge_user($auid) {
     $headers = ['Content-Type' => 'application/json'];
     $method = 'POST';
     $data = ['username' => $instance->admin_name, 'password' => $password];
-
     $data['userToDelete'] = $result->email;
 
     $options = [
@@ -359,6 +431,7 @@ function tripal_apollo_purge_user($auid) {
     ];
 
     $response = drupal_http_request($address, $options);
+
     //error check here
     if ($response->code != "200") {
       tripal_log(t('Error: Bad response from Apollo instance !id, code: !code.  Message: !message', [
@@ -368,8 +441,106 @@ function tripal_apollo_purge_user($auid) {
       ]), TRIPAL_ERROR);
       return FALSE;
     }
+
+    $data = json_decode($response->data);
+
+    if (isset($data->error)) {
+      tripal_log(t('Error: Bad response from Apollo instance !id, code: !code.  Message: !message', [
+        '!id' => $instance->id,
+        '!code' => $response->code,
+        '!message' => $data->error,
+      ]), TRIPAL_ERROR);
+      return FALSE;
+
+    }
+  }
+  return TRUE;
+}
+
+function tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_name) {
+
+
+  $user = db_select('apollo_user', 't')
+    ->fields('t')
+    ->condition('id', $apollo_user_id)
+    ->execute()
+    ->fetchObject();
+
+
+  $password = tripal_apollo_decrypt($instance_info->admin_password);
+  $address = $instance_info->url . '/user/addUserToGroup';
+
+  $headers = ['Content-Type' => 'application/json'];
+  $method = 'POST';
+
+  $data = [
+    'username' => $instance_info->admin_name,
+    'password' => $password,
+    'group' => $group_name,
+    'user' => $user->email,
+  ];
+
+
+  $options = [
+    'headers' => $headers,
+    'method' => $method,
+    'data' => json_encode($data),
+  ];
+
+  $response = drupal_http_request($address, $options);
+
+
+  if ($response->code != "200") {
+
+    tripal_log(t('Error: Bad response adding User to Group: !group. code: !code.  Message: !message', [
+      '!group' => $group_name,
+      '!code' => $response->code,
+      '!message' => $response->error,
+    ]), TRIPAL_ERROR);
+    return FALSE;
   }
 
   return TRUE;
 
+}
+
+
+/**
+ * Creates a group in the apollo instance.
+ *
+ * @param $instance_id
+ * @param $group_name
+ *
+ * @return mixed
+ */
+function tripal_apollo_create_group($instance_id, $group_name) {
+
+  $instance = tripal_apollo_get_instance($instance_id);
+
+  $address = $instance->url . '/group/createGroup';
+  $password = tripal_apollo_decrypt($instance->admin_password);
+
+  $headers = ['Content-Type' => 'application/json'];
+  $method = 'POST';
+
+  $data = [
+    'username' => $instance->admin_name,
+    'password' => $password,
+    'name' => $group_name,
+  ];
+
+
+  $options = [
+    'headers' => $headers,
+    'method' => $method,
+    'data' => json_encode($data),
+  ];
+
+  $response = drupal_http_request($address, $options);
+
+  if ($response->code != '200') {
+    tripal_log('Error creating group');
+  }
+
+  return $response;
 }
