@@ -20,4 +20,4 @@ script:
   - sh setup/set_travis_apollo.sh
  # - docker commit start tripal_apollo_appolo_1
   - docker-compose exec app drush pm-enable -y tripal_apollo
-  - docker-compose exec app bash -c "cd /modules/tripal_apollo && composer install && DRUPAL_ROOT=/var/www/html APOLLO_URL=http://apollo:8888 ./vendor/bin/phpunit"
+  - docker-compose exec app bash -c "cd /modules/tripal_apollo && composer install && DRUPAL_ROOT=/var/www/html APOLLO_URL=http://apollo ./vendor/bin/phpunit"
