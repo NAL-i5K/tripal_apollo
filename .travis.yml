@@ -18,7 +18,6 @@ before_script:
 script:
   - APOLLO_URL=http://127.0.0.1:8888 && export APOLLO_URL
   - sh setup/set_travis_apollo.sh
-  - docker ps
-  - docker commit start apollo
+ # - docker commit start tripal_apollo_appolo_1
   - docker-compose exec app drush pm-enable -y tripal_apollo
-  - docker-compose execp app bash -c "cd /modules/tripal_apollo && composer install && DRUPAL_ROOT=/var/www/html APOLLO_URL=http://apollo:8888 ./vendor/bin/phpunit"
+  - docker-compose exec app bash -c "cd /modules/tripal_apollo && composer install && DRUPAL_ROOT=/var/www/html APOLLO_URL=http://apollo:8888 ./vendor/bin/phpunit"
