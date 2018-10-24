@@ -16,7 +16,7 @@ before_script:
 - sleep 300
 
 script:
-  - APOLLO_URL=http://apollo:8888 && export APOLLO_URL
+  - APOLLO_URL=http://127.0.0.1:8888 && export APOLLO_URL
   - sh setup/set_travis_apollo.sh
   - docker ps
   - docker commit start apollo
