@@ -12,6 +12,15 @@ class tripal_apollo_api_Test extends TripalTestCase {
   // Uncomment to auto start and rollback db transactions per test method.
   use DBTransaction;
 
+
+  public function setUp(){
+
+    parent::setUp();
+
+    //add db transaction in apollo database
+
+}
+
   /**
    * Ensure that the organism is linked to the entity and the
    * get_eligible_records api returns it.
@@ -172,6 +181,12 @@ class tripal_apollo_api_Test extends TripalTestCase {
     chdir($curr_dir);
 
     return ['apollo_user_id' => $user];
+
+  }
+
+  protected function breakDown(){
+
+    parent::breakDown();
 
   }
 }
