@@ -16,3 +16,6 @@ curl -i -H 'Content-type: application/json' \
 curl -i -H 'Content-type: application/json' \
   -X POST ${APOLLO_URL}/group/createGroup -d  \
   "{'username' : 'admin@local.host', 'password' : 'password', 'name' : 'saccharomyces_cerevisiae_WRITE'}"
+
+
+
