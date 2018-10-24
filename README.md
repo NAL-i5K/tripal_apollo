@@ -79,6 +79,43 @@ This module defines the following permissions:
 
 To learn more about setting up permissions and roles, please see https://www.drupal.org/docs/7/managing-users/user-roles
 
+## Testing and development
+
+The travis CI environment uses the Docker compose file in this repository to launch a tripal site and apollo site. You can use this too: 
+
+```bash
+tar -xvf example_data/yeast.tar.gz -C example_data/
+composer install
+docker-compose up -d
+```
+  
+If you only need an apollo container, it can be run via `docker run`::
+
+```bash
+
+tar -xvf example_data/yeast.tar.gz -C example_data/
+
+docker run -it -v ${PWD}/example_data/:/data  -p 8888:8080 quay.io/gmod/docker-apollo:2.1.0
+
+## Set the APOLLO_URL variable.
+APOLLO_URL=http://localhost:8888
+export APOLLO_URL
+
+/bin/bash setup/set_travis_apollo.sh
+
+```
+
+Note the Apollo credentials for this container are: 
+
+username: admin@local.host
+password: password
+
+### Setting up Test Suite
+
+Prior to running test suite, you must run `composer install` and copy `tests/example.env` to `tests/.env`.  Note we define an extra variable in `tests/example.env`: `APOLLO_URL=http://localhost:8888`.  This **MUST** include `http` and it must point at your Apollo instance for tests to work.
+
+See https://tripaltestsuite.readthedocs.io/en/latest/environment.html?highlight=.env for general information on setting up Test Suite.
+
 ## References
 
 

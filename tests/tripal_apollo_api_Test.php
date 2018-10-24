@@ -17,7 +17,7 @@ class tripal_apollo_api_Test extends TripalTestCase {
    * get_eligible_records api returns it.
    */
   public function test_tripal_apollo_get_eligible_records() {
-    $url = 'http://127.0.0.1:8888';
+    $url = $url = getenv('APOLLO_URL');
 
     $info = tripal_apollo_configureApollo($url);
     $results = tripal_apollo_get_eligible_records();
@@ -40,7 +40,7 @@ class tripal_apollo_api_Test extends TripalTestCase {
    */
   public function test_tripal_apollo_get_users() {
 
-    $url = 'http://127.0.0.1:8888';
+    $url = getenv('APOLLO_URL');
 
     $this->add_user_with_permission();
 
@@ -93,7 +93,7 @@ class tripal_apollo_api_Test extends TripalTestCase {
 //   */
 //  public function test_tripal_apollo_purge_user() {
 //
-//    $url = 'http://127.0.0.1:8888';
+//    $url = $url = getenv('APOLLO_URL');
 //
 //    $info = $this->add_user_with_permission();
 //
@@ -127,7 +127,7 @@ class tripal_apollo_api_Test extends TripalTestCase {
 
   private function add_user_with_permission() {
 
-    $url = 'http://127.0.0.1:8888';
+    $url = $url = getenv('APOLLO_URL');
 
     $info = tripal_apollo_configureApollo($url);
 

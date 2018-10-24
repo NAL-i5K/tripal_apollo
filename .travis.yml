@@ -11,14 +11,13 @@ env:
   - DRUPAL_ROOT=/var/www/html
 
 before_script:
-  - docker pull statonlab/tripal3
-#  - docker pull quay.io/gmod/docker-apollo
+- tar -xvf example_data/yeast.tar.gz -C example_data/
+- docker-compose up -d
+- sleep 300
 
 script:
-  - docker run -it -d --rm --name tripal -v "$(pwd)":/modules/tripal_apollo statonlab/tripal3
-  - tar -zxvf example_data/yeast.tar.gz
-  - docker run -it -d --name apollo -p 8888:8080 -v "$(pwd)"/yeast:/data/yeast quay.io/gmod/docker-apollo:2.1.0
-  - sleep 300 # We pause here so postgres and apache complete booting up
-  - sh bin/set_travis_apollo.sh
-  - docker exec -it tripal drush pm-enable -y tripal_apollo
-  - docker exec -it tripal bash -c "cd /modules/tripal_apollo && composer install && DRUPAL_ROOT=/var/www/html ./vendor/bin/phpunit"
+  - APOLLO_URL=http://127.0.0.1:8888 && export APOLLO_URL
+  - sh setup/set_travis_apollo.sh
+ # - docker commit start tripal_apollo_appolo_1
+  - docker-compose exec app drush pm-enable -y tripal_apollo
+  - docker-compose exec app bash -c "cd /modules/tripal_apollo && composer install && DRUPAL_ROOT=/var/www/html APOLLO_URL=http://apollo:8080 ./vendor/bin/phpunit"

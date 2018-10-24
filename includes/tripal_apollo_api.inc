@@ -177,15 +177,14 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
       $user = array_shift($user);
     }
 
-
     //add user to group 1
 
     //create the groups in case they dont exist
 
     //TODO:  it looks like this is a bad idea.  do it in tests instead?
-
-    tripal_apollo_create_group($instance_info->id, $group_base . '_USER');
-    tripal_apollo_create_group($instance_info->id, $group_base . '_WRITE');
+//
+//    tripal_apollo_create_group($instance_info->id, $group_base . '_USER');
+//    tripal_apollo_create_group($instance_info->id, $group_base . '_WRITE');
 
     tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_base . '_USER');
 
@@ -251,6 +250,7 @@ function tripal_apollo_add_user($instance_id, $apollo_user_id, $role = 'USER') {
   ];
 
 
+
   $headers = ['Content-Type' => 'application/json'];
 
   $options = [
@@ -258,6 +258,7 @@ function tripal_apollo_add_user($instance_id, $apollo_user_id, $role = 'USER') {
     'method' => $method,
     'data' => json_encode($data),
   ];
+
 
   $response = drupal_http_request($address, $options);
 
@@ -288,7 +289,7 @@ function tripal_apollo_get_users($instance_id, $user_id = NULL) {
 
     $user_mail = db_select('apollo_user', 't')->fields('t', ['email'])
       ->condition('id', $user_id)->execute()
-      ->fetchObject();
+      ->fetchField();
     if (!$user_mail) {
       tripal_set_message('User ID not found', TRIPAL_ERROR);
       return FALSE;
@@ -307,12 +308,12 @@ function tripal_apollo_get_users($instance_id, $user_id = NULL) {
   $response = drupal_http_request($address, $options);
 
   if (!isset($response->data)) {
-    var_dump($options);
     tripal_set_message(t('Connection error for Apollo instance: !name', ['!name' => $instance->name]), TRIPAL_ERROR);
     return FALSE;
   }
 
   //remove admin user
+
 
   $data = json_decode($response->data);
 
@@ -321,7 +322,6 @@ function tripal_apollo_get_users($instance_id, $user_id = NULL) {
       unset($data[$user_number]);
     }
   }
-
   return $data;
 }
 
@@ -459,7 +459,6 @@ function tripal_apollo_purge_user($auid) {
 
 function tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_name) {
 
-
   $user = db_select('apollo_user', 't')
     ->fields('t')
     ->condition('id', $apollo_user_id)
@@ -491,6 +490,9 @@ function tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group
 
 
   if ($response->code != "200") {
+
+
+    var_dump([$response, $address, $options]);
 
     tripal_log(t('Error: Bad response adding User to Group: !group. code: !code.  Message: !message', [
       '!group' => $group_name,
