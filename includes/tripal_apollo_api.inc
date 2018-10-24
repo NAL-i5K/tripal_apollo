@@ -491,6 +491,9 @@ function tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group
 
   if ($response->code != "200") {
 
+
+    var_dump($response);
+
     tripal_log(t('Error: Bad response adding User to Group: !group. code: !code.  Message: !message', [
       '!group' => $group_name,
       '!code' => $response->code,
