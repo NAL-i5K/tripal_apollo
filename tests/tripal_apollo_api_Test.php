@@ -17,7 +17,7 @@ class tripal_apollo_api_Test extends TripalTestCase {
    * get_eligible_records api returns it.
    */
   public function test_tripal_apollo_get_eligible_records() {
-    $url = '127.0.0.1:8888';
+    $url = 'http://127.0.0.1:8888';
 
     $info = tripal_apollo_configureApollo($url);
     $results = tripal_apollo_get_eligible_records();
@@ -86,39 +86,44 @@ class tripal_apollo_api_Test extends TripalTestCase {
 
   }
 
-  public function test_tripal_apollo_purge_user() {
-
-    $url = 'http://127.0.0.1:8888';
-
-    $info = $this->add_user_with_permission();
-
-    $auid = $info['apollo_user_id'];
-
-    $response = tripal_apollo_purge_user($auid);
-
-
-    var_dump($response);
-    $this->assertTrue($response, 'purge user API returned error');
-
-    $instance = db_select('apollo_instance', 't')
-      ->fields('t')
-      ->condition('url', $url)
-      ->execute()
-      ->fetchObject();
-
-    $users = tripal_apollo_get_users($instance->id);
-
-    $has_user = FALSE;
-
-    foreach ($users as $user) {
-      if ($user->firstName == 'walrus') {
-        $has_user = TRUE;
-      }
-    }
-
-    $this->assertFalse($has_user);
-
-  }
+//
+//  /**
+//   * Purge user is currently on hold.  See @ticket 58.
+//   * @group wip
+//   */
+//  public function test_tripal_apollo_purge_user() {
+//
+//    $url = 'http://127.0.0.1:8888';
+//
+//    $info = $this->add_user_with_permission();
+//
+//    $auid = $info['apollo_user_id'];
+//
+//    $response = tripal_apollo_purge_user($auid);
+//
+//
+//    var_dump($response);
+//    $this->assertTrue($response, 'purge user API returned error');
+//
+//    $instance = db_select('apollo_instance', 't')
+//      ->fields('t')
+//      ->condition('url', $url)
+//      ->execute()
+//      ->fetchObject();
+//
+//    $users = tripal_apollo_get_users($instance->id);
+//
+//    $has_user = FALSE;
+//
+//    foreach ($users as $user) {
+//      if ($user->firstName == 'walrus') {
+//        $has_user = TRUE;
+//      }
+//    }
+//
+//    $this->assertFalse($has_user);
+//
+//  }
 
   private function add_user_with_permission() {
 

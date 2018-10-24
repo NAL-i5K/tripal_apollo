@@ -441,7 +441,20 @@ function tripal_apollo_purge_user($auid) {
       ]), TRIPAL_ERROR);
       return FALSE;
     }
+
+    $data = json_decode($response->data);
+
+    if (isset($data->error)) {
+      tripal_log(t('Error: Bad response from Apollo instance !id, code: !code.  Message: !message', [
+        '!id' => $instance->id,
+        '!code' => $response->code,
+        '!message' => $data->error,
+      ]), TRIPAL_ERROR);
+      return FALSE;
+
+    }
   }
+  return TRUE;
 }
 
 function tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_name) {
