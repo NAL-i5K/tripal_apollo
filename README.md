@@ -110,6 +110,11 @@ Note the Apollo credentials for this container are:
 username: admin@local.host
 password: password
 
+### Setting up Test Suite
+
+Prior to running test suite, you must run `composer install` and copy `tests/example.env` to `tests/.env`.  Note we define an extra variable in `tests/example.env`: `APOLLO_URL=http://localhost:8888`.  This **MUST** include `http` and it must point at your Apollo instance for tests to work.
+
+See https://tripaltestsuite.readthedocs.io/en/latest/environment.html?highlight=.env for general information on setting up Test Suite.
 
 ## References
 

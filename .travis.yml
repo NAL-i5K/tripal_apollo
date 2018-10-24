@@ -9,7 +9,6 @@ services:
 
 env:
   - DRUPAL_ROOT=/var/www/html
-  - APOLLO_URL=apollo:8888
 
 before_script:
 - tar -xvf example_data/yeast.tar.gz -C example_data/
@@ -17,6 +16,9 @@ before_script:
 - sleep 300
 
 script:
+  - APOLLO_URL=http://apollo:8888 && export APOLLO_URL
   - sh setup/set_travis_apollo.sh
+  - docker ps
+  - docker commit start apollo
   - docker-compose exec app drush pm-enable -y tripal_apollo
-  - docker-compose execp app bash -c "cd /modules/tripal_apollo && composer install && DRUPAL_ROOT=/var/www/html ./vendor/bin/phpunit"
+  - docker-compose execp app bash -c "cd /modules/tripal_apollo && composer install && DRUPAL_ROOT=/var/www/html APOLLO_URL=http://apollo:8888 ./vendor/bin/phpunit"
