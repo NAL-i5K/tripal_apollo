@@ -3,3 +3,4 @@ web_apollo2/*
 .env
 vendor/
 .idea/*
+example_data/yeast/

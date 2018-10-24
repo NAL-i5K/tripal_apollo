@@ -79,6 +79,32 @@ This module defines the following permissions:
 
 To learn more about setting up permissions and roles, please see https://www.drupal.org/docs/7/managing-users/user-roles
 
+## Testing and development
+
+The travis CI environment uses the Docker compose file in this repository to launch a tripal site and apollo site. You can use this too: 
+
+```bash
+tar -xvf example_data/yeast.tar.gz -C example_data/
+composer install
+docker-compose up -d
+```
+  
+If you only need an apollo container, it can be run via `docker run`::
+
+```bash
+
+tar -xvf example_data/yeast.tar.gz -C example_data/
+
+docker run -it -v ${PWD}/example_data/:/data  -p 8888:8080 quay.io/gmod/docker-apollo:2.1.0
+
+```
+
+Note the Apollo credentials for this container are: 
+
+username: admin@local.host
+password: password
+
+
 ## References
 
 

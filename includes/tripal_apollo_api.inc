@@ -306,8 +306,12 @@ function tripal_apollo_get_users($instance_id, $user_id = NULL) {
 
   $response = drupal_http_request($address, $options);
 
+
+  var_dump($options);
+  var_dump($address);
+  var_dump($response);
+
   if (!isset($response->data)) {
-    var_dump($options);
     tripal_set_message(t('Connection error for Apollo instance: !name', ['!name' => $instance->name]), TRIPAL_ERROR);
     return FALSE;
   }

@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  app:
+    image: 'statonlab/tripal3'
+    environment:
+      - DRUPAL_ROOT=/var/www/html
+    volumes:
+      - .:/modules/tripal_apollo
+  apollo:
+    image: 'quay.io/gmod/docker-apollo:2.1.0'
+    ports:
+      - "8888:8080"
+    volumes:
+      - .'./example_data/yeast:/data'
