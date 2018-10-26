@@ -19,7 +19,6 @@ function tripal_apollo_gen_xkcd_password($num_of_words = 1) {
         // String only contains a to z characters
         $plain = TRUE;
         $password = $password . ucwords($dict_lines[$key]);
-
         if ($i != $num_of_words) {
           $password = $password . $rand_num;
         }
@@ -179,7 +178,6 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
 
     if (!$user) {
       $user = tripal_apollo_add_user($instance_info->id, $apollo_user_id);
-      $user = array_shift($user);
     }
 
     //add user to group 1
@@ -192,34 +190,9 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
 //    tripal_apollo_create_group($instance_info->id, $group_base . '_WRITE');
 
     tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_base . '_USER');
-
-
     tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_base . '_WRITE');
 
   }
-  //
-  //
-  //    $script_path .= 'add_user2.py';
-  //
-  //    $command_base = $python_path . " " . $script_path .
-  //      " -dbuser " . $admin_user .
-  //      " -dbpass " . $admin_pass .
-  //      " -user " . $user .
-  //      " -pwd " . $user_pass .
-  //      " -host " . $host .
-  //      " -fname " . $fname .
-  //      " -lname " . $lname;
-  //
-  //
-  //    //TODO: Make this configurable?
-  //    $exec_user = exec($command_base .
-  //      " -group " . $group_base . "_USER");
-  //    $exec_user = exec($command_base .
-  //      " -group " . $group_base . "_WRITE");
-  //    //Parameters not supplied:
-  //    //metadata, token
-
-
   return TRUE;
 }
 
@@ -254,8 +227,6 @@ function tripal_apollo_add_user($instance_id, $apollo_user_id, $role = 'USER') {
     'newPassword' => $password_user,
   ];
 
-
-
   $headers = ['Content-Type' => 'application/json'];
 
   $options = [
@@ -266,8 +237,7 @@ function tripal_apollo_add_user($instance_id, $apollo_user_id, $role = 'USER') {
 
 
   $response = drupal_http_request($address, $options);
-
-  return array_shift($response);
+  return $response;
 
 }
 
@@ -471,7 +441,6 @@ function tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group
     ->execute()
     ->fetchObject();
 
-
   $password = tripal_apollo_decrypt($instance_info->admin_password);
   $address = $instance_info->url . '/user/addUserToGroup';
 
@@ -497,8 +466,6 @@ function tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group
 
   if ($response->code != "200") {
 
-
-    var_dump([$response, $address, $options]);
 
     tripal_log(t('Error: Bad response adding User to Group: !group. code: !code.  Message: !message', [
       '!group' => $group_name,
