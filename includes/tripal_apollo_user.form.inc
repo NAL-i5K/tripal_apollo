@@ -10,7 +10,7 @@ function tripal_apollo_user_form($form, &$form_state, $auid) {
 
   $auser = db_select('apollo_user', 'au')
     ->fields('au')
-    -condition('id', $auid)
+    ->condition('id', $auid)
     ->execute()
     ->fetchObject();
 
