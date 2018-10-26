@@ -77,7 +77,9 @@ function tripal_apollo_user_form($form, &$form_state, $auid) {
   ];
 
 
-  $form['instructions'] = ['#markup' => '<p><b>Warning!</b>  Deleting this user will delete all their requests and all accounts across all instances.</p><p>Please note this will not delete the associated Drupal user.</p>'];
+  $form['instructions'] = ['#markup' => '<p><b>Warning!</b>  Deleting this user will delete all their requests and all accounts across all instances.</p><p>Please note this will not delete the associated Drupal user.</p>
+
+<p>For now the delete user functionality is under development and disabled.</p>'];
 
 
 
@@ -91,6 +93,7 @@ function tripal_apollo_user_form($form, &$form_state, $auid) {
     '#type' => 'submit',
     '#submit' => ['tripal_apollo_user_delete'],
     '#value' => t('Delete Apollo User'),
+    '#disabled' => TRUE
   ];
 
   return $form;
