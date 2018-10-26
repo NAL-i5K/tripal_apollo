@@ -40,15 +40,15 @@ Each row is for a single user - organism request pairing, so a single form submi
 
 # Admin setup
 
-## Apollo 1 setup
+Download the module using git (`git clone https://github.com/NAL-i5K/tripal_apollo.git`).  Enable the module with drush:  `drush pm-enable tripal_apollo`).  Instructions are the same for both Tripal 2 and Tripal 3 sites.
 
-Apollo 1 does not support a REST API.  Your Apollo 1 server's database must therefore be setup to accept remote connections by editing  `pg_hba.conf`.
-
+User passwords are generated using the `/usr/share/dict/words` file.  If this file doesnt exist on your server, please create it and populate with words you would like your user passwords generated with.
 
 ## Site-wide settings
 
 Site-wide settings can be set at `/admin/tripal_apollo`.  
 
+Python path is only necessary for Apollo 1.
 
 **Important notice!!!**  Switching base tables will **wipe all information linking instances to records and records to users**.  Be very mindful of changing this setting!
 
@@ -80,6 +80,13 @@ This module defines the following permissions:
  * access apollo: allows users to make apollo registration requests.  You can give this permission to anonymous users, allowing users to register for apollo accounts without a Drupal account.
 
 To learn more about setting up permissions and roles, please see https://www.drupal.org/docs/7/managing-users/user-roles
+
+
+
+## Apollo 1 setup
+
+Apollo 1 does not support a REST API.  Your Apollo 1 server's database must therefore be setup to accept remote connections by editing  `pg_hba.conf`.
+
 
 ## Testing and development
 
