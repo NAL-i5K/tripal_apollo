@@ -86,76 +86,76 @@ function tripal_apollo_schema() {
 
 
   //TODO: should we ditch this? Instead link drupal users to chado contacts.
-
-  $schema['webapollo_users'] = [
-    'description' => 'Web apollo users table.',
-    'fields' => [
-      'uid' => [
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'description' => 'Primary Key: Unique user ID.',
-      ],
-      'name' => [
-        'type' => 'varchar',
-        'length' => 60,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Unique user name.',
-      ],
-      'pass' => [
-        'type' => 'varchar',
-        'length' => 32,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => "User's password (md5 hash).",
-      ],
-      'email' => [
-        'type' => 'varchar',
-        'length' => 64,
-        'not null' => FALSE,
-        'default' => '',
-        'description' => "User's email address.",
-      ],
-      'organisms' => [
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Organisms',
-      ],
-      'institution' => [
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Institution',
-      ],
-      'comment' => [
-        'type' => 'text',
-        'size' => 'big',
-        'not null' => FALSE,
-        'description' => 'The comment body.',
-      ],
-      'created' => [
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 0,
-        'description' => 'Timestamp for when user was created.',
-      ],
-      'status' => [
-        'type' => 'int',
-        'not null' => TRUE,
-        'default' => 2,
-        'size' => 'tiny',
-        'description' => 'Whether the user is active(1/2) or blocked(0).  ALSO if this instance is an apollo 1 (1) or apollo 2 (2) instance.',
-      ],
-    ],
-    'unique keys' => [
-      'email_organism' => ['email', 'organisms'],
-    ],
-    'primary key' => ['uid'],
-  ];
+//
+//  $schema['webapollo_users'] = [
+//    'description' => 'Web apollo users table.',
+//    'fields' => [
+//      'uid' => [
+//        'type' => 'serial',
+//        'unsigned' => TRUE,
+//        'not null' => TRUE,
+//        'description' => 'Primary Key: Unique user ID.',
+//      ],
+//      'name' => [
+//        'type' => 'varchar',
+//        'length' => 60,
+//        'not null' => TRUE,
+//        'default' => '',
+//        'description' => 'Unique user name.',
+//      ],
+//      'pass' => [
+//        'type' => 'varchar',
+//        'length' => 32,
+//        'not null' => TRUE,
+//        'default' => '',
+//        'description' => "User's password (md5 hash).",
+//      ],
+//      'email' => [
+//        'type' => 'varchar',
+//        'length' => 64,
+//        'not null' => FALSE,
+//        'default' => '',
+//        'description' => "User's email address.",
+//      ],
+//      'organisms' => [
+//        'type' => 'varchar',
+//        'length' => 128,
+//        'not null' => TRUE,
+//        'default' => '',
+//        'description' => 'Organisms',
+//      ],
+//      'institution' => [
+//        'type' => 'varchar',
+//        'length' => 128,
+//        'not null' => TRUE,
+//        'default' => '',
+//        'description' => 'Institution',
+//      ],
+//      'comment' => [
+//        'type' => 'text',
+//        'size' => 'big',
+//        'not null' => FALSE,
+//        'description' => 'The comment body.',
+//      ],
+//      'created' => [
+//        'type' => 'int',
+//        'not null' => TRUE,
+//        'default' => 0,
+//        'description' => 'Timestamp for when user was created.',
+//      ],
+//      'status' => [
+//        'type' => 'int',
+//        'not null' => TRUE,
+//        'default' => 2,
+//        'size' => 'tiny',
+//        'description' => 'Whether the user is active(1/2) or blocked(0).  ALSO if this instance is an apollo 1 (1) or apollo 2 (2) instance.',
+//      ],
+//    ],
+//    'unique keys' => [
+//      'email_organism' => ['email', 'organisms'],
+//    ],
+//    'primary key' => ['uid'],
+//  ];
 
   return $schema;
 }
