@@ -16,11 +16,7 @@ function tripal_apollo_install() {
   variable_set('tripal_apollo_base_table', "organism");
 
   variable_set('tripal_apollo_encrypt', FALSE);
-
-  if (function_exists('mcrypt_module_open')) {
-    variable_set('tripal_apollo_encrypt', TRUE);
-  }
-
+  
 }
 
 /**
