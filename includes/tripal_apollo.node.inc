@@ -126,11 +126,21 @@ function apollo_instance_form($node, &$form_state) {
     '#default_value' => property_exists($node, 'admin_name') ? $node->admin_name : '',
   ];
 
+
+  $pass_value = NULL;
+
+  $password =  property_exists($node, 'admin_password') ? $node->admin_password  :  null;
+
+  if ($password){
+    $pass_value = tripal_apollo_decrypt($password);
+  }
+
+
   $form['core']['admin_password'] = [
     '#type' => 'textfield',
     '#title' => t("Database admin password"),
     '#required' => TRUE,
-    '#default_value' => NULL,
+    '#default_value' => $pass_value,
     '#description' => 'For Apollo 1 this is the DATABASE admin username.  For Apollo 2, it is the Apollo admin user account name.',
   ];
 
@@ -261,8 +271,6 @@ function apollo_instance_insert($node) {
         'record_id' => $record,
       ])
       ->execute();
-
-
   }
 
 }
@@ -331,12 +339,13 @@ function apollo_instance_load($nodes) {
   $result = db_query($sql, [':nids' => array_keys($nodes)]);
 
   foreach ($result as $record) {
-    // Add basic blast node information.
     $nodes[$record->nid]->instance_name = $record->name;
     $nodes[$record->nid]->database_name = $record->database_name;
     $nodes[$record->nid]->url = $record->url;
     $nodes[$record->nid]->apollo_version = $record->apollo_version;
     $nodes[$record->nid]->title = $record->name;
+    $nodes[$record->nid]->admin_name = $record->admin_name;
+    $nodes[$record->nid]->admin_password = $record->admin_password;
     //get user info
     $users = tripal_apollo_get_users($record->id);
     $nodes[$record->nid]->connection_error = FALSE;
