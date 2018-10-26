@@ -14,15 +14,24 @@ function tripal_apollo_migrate_webapollo() {
     ->fetchAll();
   $organism_lookup = [];
 
-  foreach ($organisms as $organism) {
 
-    /**
-     * Counting on the organism in webapollo being first 3 letters of genus first 3 letters of species.
-     */
+    foreach ($organisms as $organism) {
 
-    $code = strtolower(substr($organism->genus, 0, 3)) . substr($organism->species, 0, 3);
-    $organism_lookup[$code] = $organism->organism_id;
-  }
+      /**
+       * Counting on the organism in webapollo being first 3 letters of genus first 3 letters of species.
+       */
+
+      $code = strtolower(substr($organism->genus, 0, 3)) . substr($organism->species, 0, 3);
+
+      if (isset($organism_lookup[$code])){
+        print("$code is already in use!\n");
+        return;
+      }
+      if ($code == "censcu"){
+        $organism_lookup['cenexi'] = $organism->organism_id;
+      }
+      $organism_lookup[$code] = $organism->organism_id;
+    }
 
   $wa_users = db_select('public.webapollo_users', 't')
     ->fields('t')
