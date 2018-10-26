@@ -20,17 +20,23 @@ function tripal_apollo_migrate_webapollo() {
      * Counting on the organism in webapollo being first 3 letters of genus first 3 letters of species.
      */
 
-    $code = substr($organism->genus, 0, 2) . substr($organism->species, 0, 2);
+    $code = strtolower(substr($organism->genus, 0, 3)) . substr($organism->species, 0, 3);
     $organism_lookup[$code] = $organism->organism_id;
   }
 
   $wa_users = db_select('public.webapollo_users', 't')
     ->fields('t')
     ->distinct()
-    ->select()
     ->execute();
 
+    $count = 0;
+
   foreach ($wa_users as $wa_user) {
+    $count++;
+
+    if ($count % 100 == 0){
+      print ("converting record " . $count);
+    }
 
     $name = $wa_user->name;
     $pass = $wa_user->pass;
@@ -42,7 +48,7 @@ function tripal_apollo_migrate_webapollo() {
     $email = $wa_user->email;
 
     $id = db_select('public.apollo_user', 't')
-      ->fields('id')
+      ->fields('t', ['id'])
       //   ->condition('name', $name)
       //   ->condition('pass', tripal_apollo_encrypt($pass))
       //   ->condition('institution', $institution)
@@ -51,7 +57,7 @@ function tripal_apollo_migrate_webapollo() {
       ->fetchField();
 
     if (!$id) {
-      $id = db_insert('public.apollo_user', 't')
+      $id = db_insert('public.apollo_user')
         ->fields([
           'uid' => NULL,
           'name' => $name,
@@ -59,7 +65,7 @@ function tripal_apollo_migrate_webapollo() {
           'email' => $email,
           'institution' => $institution,
           'comment' => $comment,
-          'created' => $created,
+        //  'created' => $created,
         ])
         ->execute();
     }
