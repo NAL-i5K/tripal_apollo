@@ -100,6 +100,9 @@ function tripal_apollo_registration_form($form, &$form_state) {
     $form['exit'] = [
       '#markup' => '<p>There are no additional ' . $base . 's with Apollo set up.</p>',
     ];
+
+    unset($form['name']);
+    unset($form['mail']);
     return $form;
 
   }
