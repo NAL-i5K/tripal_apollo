@@ -53,6 +53,11 @@ function tripal_apollo_get_eligible_records() {
           'species',
         ], [$base_key => $record_id]);
 
+        if (!$result){
+          //todo:  should we instead delete the record?
+          continue;
+        }
+
         $result = $result[0];
 
         $out[$record_id] = $result->genus . ' ' . $result->species;
