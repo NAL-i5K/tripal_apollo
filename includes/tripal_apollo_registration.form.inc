@@ -22,6 +22,9 @@ function tripal_apollo_registration_form($form, &$form_state) {
 
   global $user;
 
+  $base = variable_get('tripal_apollo_base_table');
+  $pkey = $base . '_id';
+
   $associated_records = [];
   //if we're logged in, remove the records already associated.
 
@@ -38,8 +41,6 @@ function tripal_apollo_registration_form($form, &$form_state) {
 
     $results = $query->execute()->fetchAll();
 
-    $base = variable_get('tripal_apollo_base_table');
-    $pkey = $base . '_id';
 
     foreach ($results as $result) {
       $record_id = $result->record_id;

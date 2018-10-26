@@ -317,10 +317,11 @@ function tripal_apollo_get_users($instance_id, $user_id = NULL) {
     return FALSE;
   }
 
-  //remove admin user
-
-
   $data = json_decode($response->data);
+
+  if (!$data){
+    return FALSE;
+  }
 
   foreach ($data as $user_number => $user) {
     if ($user->role === 'ADMIN') {
