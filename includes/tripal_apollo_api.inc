@@ -519,3 +519,25 @@ function tripal_apollo_create_group($instance_id, $group_name) {
 
   return $response;
 }
+
+function tripal_apollo_convert_status_for_display($num_status){
+
+  $val = "";
+  switch ($num_status){
+
+    case 0:
+      $val ='Rejected';
+      break;
+    case 1:
+      $val = 'Approved';
+      break;
+    case 2:
+      $val = 'Pending';
+      break;
+    default:
+      $val = 'Pending';
+      break;
+  }
+
+  return $val;
+}

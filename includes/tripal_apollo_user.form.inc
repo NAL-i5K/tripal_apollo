@@ -121,9 +121,120 @@ function tripal_apollo_user_delete($form, &$form_state) {
 
 }
 
+
+/**
+ * Implements hook_form().
+ * Provides a tab to the user page area so that users can see what apollo stuff
+ * they have access to, and let them request more access from here as well.
+ */
+
 function tripal_apollo_user_permissions_page($form, &$form_state, $uid) {
 
-  $form['title'] = ['#markup'=>"<h2>You can use the below form to request access to Apollo, or view the status of your access.</h2>"];
+  $form['title'] = ['#markup' => "<h2>You can use the below form to request access to Apollo, or view the status of your access.</h2>"];
+
+  global $user;
+
+  $email = $user->mail;
+
+  $au = db_select('apollo_user', 't')
+    ->fields('t')
+    ->condition('email', $email)
+    ->execute()
+    ->fetchObject();
+
+  if (!$au) {
+    //User might have an account but with a different email.
+    $au = db_select('apollo_user', 't')
+      ->fields('t')
+      ->condition('uid', $user->uid)
+      ->execute()
+      ->fetchObject();
+  }
+
+  $form['au'] = ['#type' => 'value', '#value' => $au];
+
+  if (!$au) {
+    //User hasn't registered. Go right to offering registration.
+    $form['register'] = ['#markup' => 'Register!  coming soon'];
+    return $form;
+  }
+
+
+  $base = variable_get('tripal_apollo_base_table');
+
+  $pkey = $base . '_id';
+
+
+  $header = [
+    'Record',
+    'Status',
+    'Date Requested',
+  ];
+
+  $query = db_select('apollo_user_record', 'aur')
+    ->fields('aur', ['status', 'created', 'record_id'])
+    ->condition('apollo_user_id', $au->id);
+  $query->join('chado.' . $base, 'bt', 'bt.' . $pkey . ' = aur.record_id');
+  $query = $query->extend('TableSort')
+    // ->orderByHeader($header)
+    ->extend('PagerDefault')
+    ->limit(25);
+
+  if ($base === 'organism') {
+    $query->fields('bt', ['genus', 'species']);
+  }
+  else {
+    $query->fields('bt', ['name']);
+  }
+
+  $requests = $query->execute();
+
+  $rows = [];
+  $existing = [];
+  //build table of statuses.
+  foreach ($requests as $request) {
+    $existing[$request->record_id] = $request->record_id;
+    if ($base == 'organism') {
+      $name = $request->genus . ' ' . $request->species;
+    }
+    else {
+      $name = $request->name;
+    }
+    $date = date('M d Y h:i:s A', $request->created);
+
+    $num_status = $request->status;
+
+    $status = tripal_apollo_convert_status_for_display($num_status);
+    $rows[] = [$name, $status, $date];
+  }
+
+  $table = theme('table', ['header' => $header, 'rows' => $rows]);
+
+  $form['existing_request'] = ['#markup' => $table];
+  //get records the user hasnt requested
+
+
+  $all_records = tripal_apollo_get_eligible_records();
+
+  foreach ($existing as $key) {
+
+    unset($all_records[$key]);
+  }
+  //provide multiselect tool.  Don't let people withdraw requests!
+
+  $form['new_request'] = [
+    '#title' => 'Request Access',
+    '#description' => 'Select one or more of the ' . $base . 's below',
+    '#type' => 'select',
+    '#multiple' => TRUE,
+    '#options' => $all_records,
+  ];
+
+  $form['submit'] = [
+
+    '#type' => 'submit',
+    '#value' => 'Request Access',
+  ];
 
   return $form;
 
