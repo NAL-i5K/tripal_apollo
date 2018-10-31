@@ -78,15 +78,16 @@ function tripal_apollo_user_form($form, &$form_state, $auid) {
   ];
 
 
-  $form['instructions'] = ['#markup' => '<p><b>Warning!</b>  Deleting this user will delete all their requests and all accounts across all instances.</p><p>Please note this will not delete the associated Drupal user.</p>
+  $form['instructions'] = [
+    '#markup' => '<p><b>Warning!</b>  Deleting this user will delete all their requests and all accounts across all instances.</p><p>Please note this will not delete the associated Drupal user.</p>
 
-<p>For now the delete user functionality is under development and disabled.</p>'];
-
+<p>For now the delete user functionality is under development and disabled.</p>',
+  ];
 
 
   $form['auid'] = [
     '#type' => 'value',
-    '#value' => $auid
+    '#value' => $auid,
   ];
 
 
@@ -94,7 +95,7 @@ function tripal_apollo_user_form($form, &$form_state, $auid) {
     '#type' => 'submit',
     '#submit' => ['tripal_apollo_user_delete'],
     '#value' => t('Delete Apollo User'),
-    '#disabled' => TRUE
+    '#disabled' => TRUE,
   ];
 
   return $form;
@@ -113,10 +114,18 @@ function tripal_apollo_user_delete($form, &$form_state) {
   }
   //Now: delete all apollo_user based records.
   db_delete('apollo_user')
-  ->condition('id', $auid)
-  ->execute();
+    ->condition('id', $auid)
+    ->execute();
 
   $form_state['redirect'] = variable_get('site_frontpage');
+
+}
+
+function tripal_apollo_user_permissions_page($form, &$form_state, $uid) {
+
+  $form['title'] = ['#markup'=>"<h2>You can use the below form to request access to Apollo, or view the status of your access.</h2>"];
+
+  return $form;
 
 }
 
