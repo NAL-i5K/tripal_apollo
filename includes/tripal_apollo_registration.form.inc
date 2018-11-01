@@ -270,11 +270,9 @@ function tripal_apollo_registration_form_submit($form, &$form_state) {
       ->execute();
 
   }
-
-
   //send emails
-  $from = $values['name'] . "<" . $values['mail'] . ">";
-  $sent = drupal_mail('tripal_apollo', 'notify_admin_organism_request', $admin_email, language_default(), $values, $from, TRUE);
+  $sent = tripal_apollo_notify_admins_of_request($record_id, $values);
+
 
 
   if (empty($sent['result']) || ($sent['result'] != 1)) {

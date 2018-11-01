@@ -257,7 +257,7 @@ function tripal_apollo_user_permissions_page_submit($form, &$form_state){
   }
 
   foreach ($requests as $record_id){
-     db_insert('apollo_user')
+     db_insert('apollo_user_record')
       ->fields([
         'record_id' => $record_id,
         'apollo_user_id' => $au_id,
@@ -265,5 +265,7 @@ function tripal_apollo_user_permissions_page_submit($form, &$form_state){
         'created' => time(),
       ])
       ->execute();
+     //send emails
+
   }
 }
