@@ -70,8 +70,6 @@ function tripal_apollo_get_eligible_records() {
         $out[$record_id] = $result->name;
         break;
     }
-
-
   }
 
   return $out;

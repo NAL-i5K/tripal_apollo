@@ -224,7 +224,7 @@ function tripal_apollo_user_permissions_page($form, &$form_state, $uid) {
 
   $form['new_request'] = [
     '#title' => 'Request Access',
-    '#description' => 'Select one or more of the ' . $base . 's below',
+    '#description' => 'Select one or more of the ' . $base . 's above.',
     '#type' => 'select',
     '#multiple' => TRUE,
     '#options' => $all_records,
@@ -240,3 +240,65 @@ function tripal_apollo_user_permissions_page($form, &$form_state, $uid) {
 
 }
 
+
+/**
+ * Implements hook_validate()
+ */
+function tripal_apollo_user_permissions_page_validate($form, &$form_state){
+
+  $base = variable_get('tripal_apollo_base_table');
+
+  $key = $base . 's';
+
+  $requests = $form_state['values']['new_request'];
+  if (empty($requests)){
+    form_set_error('new_request', t('Please select one or more !key to request Apollo access to.', ['!key' => $key]));
+  }
+}
+
+/**
+ * Implements hook_submit().
+ * Submits requests for the records provided.
+ */
+function tripal_apollo_user_permissions_page_submit($form, &$form_state){
+
+  $requests = $form_state['values']['new_request'];
+
+  $a_user = $form_state['values']['au'];
+
+  $au_id = $a_user->id;
+
+  if (!$a_user){
+
+    global $user;
+    //create a user account for this person.
+
+    $password = tripal_apollo_gen_xkcd_password(2);
+    $password = tripal_apollo_encrypt($password);
+
+    $au_id = db_insert('apollo_user')
+      ->fields([
+        'uid' => $user->uid,
+        'name' => $user->name,
+        'pass' => $password,
+        'email' => $user->mail,
+      //  'institution' => $values['institution'],
+      //  'comment' => $values['comments'],
+      ])
+      ->execute();
+  }
+
+  foreach ($requests as $record_id){
+
+     db_insert('apollo_user')
+      ->fields([
+        'record_id' => $record_id,
+        'apollo_user_id' => $au_id,
+        'status' => 2,
+        'created' => time(),
+      ])
+      ->execute();
+  }
+
+
+}
