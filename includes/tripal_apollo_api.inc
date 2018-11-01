@@ -52,7 +52,7 @@ function tripal_apollo_get_eligible_records() {
           'species',
         ], [$base_key => $record_id]);
 
-        if (!$result){
+        if (!$result) {
           //todo:  should we instead delete the record?
           continue;
         }
@@ -70,8 +70,6 @@ function tripal_apollo_get_eligible_records() {
         $out[$record_id] = $result->name;
         break;
     }
-
-
   }
 
   return $out;
@@ -185,9 +183,9 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
     //create the groups in case they dont exist
 
     //TODO:  it looks like this is a bad idea.  do it in tests instead?
-//
-//    tripal_apollo_create_group($instance_info->id, $group_base . '_USER');
-//    tripal_apollo_create_group($instance_info->id, $group_base . '_WRITE');
+    //
+    //    tripal_apollo_create_group($instance_info->id, $group_base . '_USER');
+    //    tripal_apollo_create_group($instance_info->id, $group_base . '_WRITE');
 
     tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_base . '_USER');
     tripal_apollo_add_user_to_group($instance_info, $apollo_user_id, $group_base . '_WRITE');
@@ -289,7 +287,7 @@ function tripal_apollo_get_users($instance_id, $user_id = NULL) {
 
   $data = json_decode($response->data);
 
-  if (!$data){
+  if (!$data) {
     return FALSE;
   }
 
@@ -518,4 +516,54 @@ function tripal_apollo_create_group($instance_id, $group_name) {
   }
 
   return $response;
+}
+
+function tripal_apollo_convert_status_for_display($num_status) {
+
+  switch ($num_status) {
+    case 0:
+      $val = 'Rejected';
+      break;
+    case 1:
+      $val = 'Approved';
+      break;
+    case 2:
+      $val = 'Pending';
+      break;
+    default:
+      $val = 'Unknown';
+      break;
+  }
+
+  return $val;
+}
+
+
+function tripal_apollo_user_existing_requests_table($au, $header) {
+
+
+  $base = variable_get('tripal_apollo_base_table');
+
+  $pkey = $base . '_id';
+
+
+  $query = db_select('apollo_user_record', 'aur')
+    ->fields('aur', ['status', 'created', 'record_id'])
+    ->condition('apollo_user_id', $au->id);
+  $query->join('chado.' . $base, 'bt', 'bt.' . $pkey . ' = aur.record_id');
+  $query = $query->extend('TableSort')
+    // ->orderByHeader($header)
+    ->extend('PagerDefault')
+    ->limit(25);
+
+  if ($base === 'organism') {
+    $query->fields('bt', ['genus', 'species']);
+  }
+  else {
+    $query->fields('bt', ['name']);
+  }
+
+  $requests = $query->execute();
+
+
 }
