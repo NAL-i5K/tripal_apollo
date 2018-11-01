@@ -83,6 +83,12 @@ This module defines the following permissions:
 
 To learn more about setting up permissions and roles, please see https://www.drupal.org/docs/7/managing-users/user-roles
 
+## Chado specific permissions
+
+If you have the `tripal_hq` and `tripal_hq_permissions` modules enabled, you can use Chado-specific permissions!  This means you can have a user role that can, for example, approve Apollo requests for a subset of organisms **only**.  Simply configure HQ permissions for curators based on chado **organisms**.
+
+Please see the [`tripal_hq` module for more information](https://github.com/statonlab/tripal_hq).
+
 ## Apollo 1 setup
 
 Apollo 1 does not support a REST API.  Your Apollo 1 server's database must therefore be setup to accept remote connections by editing `pg_hba.conf`.

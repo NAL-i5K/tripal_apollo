@@ -21,57 +21,58 @@ function tripal_apollo_user_table($type) {
   $type_convert = ["approved" => 1, "rejected" => 0, "pending" => 2];
 
 
+  $deputy = user_access('tripal_hq_permissions deputy');
+
+  global $user;
+  $uid = $user->uid;
+
   $output = "";
 
-  if (isset($_GET['sort']) && isset($_GET['order'])) {
-    // Sort it Ascending or Descending?
-    if ($_GET['sort'] == 'asc') {
-      $sort = 'ASC';
-    }
-    else {
-      $sort = 'DESC';
-    }
-    // Which column will be sorted
-    switch ($_GET['order']) {
-      case 'Name':
-        $order = 'name';
-        break;
-      case 'Email':
-        $order = 'email';
-        break;
-      case 'Record':
-        $order = 'record_id';
-        break;
-      case 'Status':
-        $order = 'status';
-        break;
-      default:
-        $order = 'created';
-    }
-  }
-  else {
-    // Default sort
-    $sort = 'DESC';
-    $order = 'created';
-  }
 
-  $query = db_select("apollo_user_record", "aur");
+  $header = [
+
+    'Name' => ["data" => t('Name'), "field" => "name"],
+    'Email' => ["data" => t('Email'), "field" => "email"],
+    'Record' => ["data" => t('Record'), "field" => "record_id"],
+    'Status' => ["data" => t('Status'), "field" => "status"],
+    'Date Created' => [
+      "data" => t('Created'),
+      "field" => "created",
+      'sort' => 'dsc',
+    ],
+    'Action' => ["data" => t('Action'), "field" => 'action'],
+
+  ];
+
+  $query = db_select("apollo_user_record", "aur")
+    ->extend('TableSort')
+    ->orderByHeader($header)
+    ->extend('PagerDefault');
+
 
   $query->fields('aur', [
     'id',
     'record_id',
     'status',
     'created',
-    'apollo_user_id'
+    'apollo_user_id',
   ]);
 
-  if ($type != "all"){
 
+  if ($type != "all") {
 
     $check = $type_convert[$type];
 
     $query->condition('status', $check);
   }
+
+  $base = variable_get('tripal_apollo_base_table');
+  if ($deputy && $uid != 0 && $uid != 1) {
+    $query->join('tripal_hq_permissions', 'thp', 'thp.record_id = aur.record_id');
+    $query->condition('thp.uid', $uid);
+    $query->condition('thp.base_table', $base);
+  }
+
   $query->join('apollo_instance_record', 'air', 'air.record_id = aur.record_id');
 
   $query->fields('air', [
@@ -80,19 +81,8 @@ function tripal_apollo_user_table($type) {
   ]);
   $query->join('apollo_user', 'au', 'au.id = aur.apollo_user_id');
   $query->fields('au', ['name', 'email']);
-  $query->orderBy($order, $sort);
-  $query = $query->extend('TableSort')->extend('PagerDefault')->limit(25);
+  $query = $query->limit(25);
   $result = $query->execute();
-
-
-  $header = [
-    ["data" => t('Name'), "field" => "name"],
-    ["data" => t('Email'), "field" => "email"],
-    ["data" => t('Record'), "field" => "record_id"],
-    ["data" => t('Status'), "field" => "status"],
-    ["data" => t('Created'), "field" => "created", 'sort' => 'desc'],
-    ["data" => t('Action'), "field" => 'action'],
-  ];
 
   // Now build the form array
   $rows = [];
@@ -136,19 +126,14 @@ function tripal_apollo_user_table($type) {
   }
 
   // Output of table with the paging
-  $output = theme_table(
-      [
-        "header" => $header,
-        "rows" => $rows,
-        "attributes" => [],
-        "sticky" => TRUE,
-        // Table header will be sticky
-        "caption" => "",
-        "colgroups" => [],
-        "empty" => t("There are no requests.")
-        // The message to be displayed if table is empty
-      ]
-    ) . theme("pager");
+  $output = theme('table',
+    [
+      "header" => $header,
+      "rows" => $rows,
+      "empty" => t("There are no requests.")
+      // The message to be displayed if table is empty
+    ]
+  );
 
   return $output;
 }
