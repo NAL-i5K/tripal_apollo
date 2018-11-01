@@ -53,20 +53,8 @@ function tripal_apollo_user_form($form, &$form_state, $auid) {
 
     $status = $request->status;
 
-    switch ($status) {
-      case '0':
-        $status_string = 'Pending';
-        break;
-      case '1':
-        $status_string = 'Approved';
-        break;
-      case '2':
-        $status_string = 'Denied';
-        break;
-      default:
-        $status_string = 'Unknown';
-        break;
-    }
+    $status_string = tripal_apollo_convert_status_for_display($status);
+
     $rows[] = [$request->genus . ' ' . $request->species, $status_string];
 
   }
@@ -133,6 +121,8 @@ function tripal_apollo_user_permissions_page($form, &$form_state, $uid) {
   $form['title'] = ['#markup' => "<h2>You can use the below form to request access to Apollo, or view the status of your access.</h2>"];
 
   global $user;
+  $base = variable_get('tripal_apollo_base_table');
+
 
   $email = $user->mail;
 
@@ -159,35 +149,13 @@ function tripal_apollo_user_permissions_page($form, &$form_state, $uid) {
     return $form;
   }
 
-
-  $base = variable_get('tripal_apollo_base_table');
-
-  $pkey = $base . '_id';
-
-
   $header = [
     'Record',
     'Status',
     'Date Requested',
   ];
 
-  $query = db_select('apollo_user_record', 'aur')
-    ->fields('aur', ['status', 'created', 'record_id'])
-    ->condition('apollo_user_id', $au->id);
-  $query->join('chado.' . $base, 'bt', 'bt.' . $pkey . ' = aur.record_id');
-  $query = $query->extend('TableSort')
-    // ->orderByHeader($header)
-    ->extend('PagerDefault')
-    ->limit(25);
-
-  if ($base === 'organism') {
-    $query->fields('bt', ['genus', 'species']);
-  }
-  else {
-    $query->fields('bt', ['name']);
-  }
-
-  $requests = $query->execute();
+  $requests = tripal_apollo_user_existing_requests_table($au, $header);
 
   $rows = [];
   $existing = [];
@@ -289,7 +257,6 @@ function tripal_apollo_user_permissions_page_submit($form, &$form_state){
   }
 
   foreach ($requests as $record_id){
-
      db_insert('apollo_user')
       ->fields([
         'record_id' => $record_id,
@@ -299,6 +266,4 @@ function tripal_apollo_user_permissions_page_submit($form, &$form_state){
       ])
       ->execute();
   }
-
-
 }
