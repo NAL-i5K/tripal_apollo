@@ -567,7 +567,7 @@ function tripal_apollo_user_existing_requests_table($au, $header) {
 
 }
 
-function tripal_apollo_notify_admins_of_request($record_id,  $form_values) {
+function tripal_apollo_notify_admins_of_request($type, $record_id,  $form_values) {
 
   $admin_email = variable_get('site_mail');
   ;
@@ -581,7 +581,7 @@ function tripal_apollo_notify_admins_of_request($record_id,  $form_values) {
   }
 
   $from = $form_values['name'] . "<" . $form_values['mail'] . ">";
-  $sent  = drupal_mail('tripal_apollo', 'notify_admin_organism_request', $admin_email, language_default(), $form_values, $from, TRUE);
+  $sent  = drupal_mail('tripal_apollo', $type, $admin_email, language_default(), $form_values, $from, TRUE);
 
   return $sent;
 }

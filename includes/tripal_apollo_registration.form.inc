@@ -271,8 +271,7 @@ function tripal_apollo_registration_form_submit($form, &$form_state) {
 
   }
   //send emails
-  $sent = tripal_apollo_notify_admins_of_request($record_id, $values);
-
+  $sent = tripal_apollo_notify_admins_of_request('notify_admin_organism_request', $record_id, $values);
 
 
   if (empty($sent['result']) || ($sent['result'] != 1)) {
