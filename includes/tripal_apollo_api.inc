@@ -575,8 +575,8 @@ function tripal_apollo_notify_admins_of_request($type, $record_id,  $form_values
 
     $admins = tripal_hq_permissions_get_admins($record_id, 'organism');
 
-    foreach ($admins as $admin){
-      $admin_email .= ', '.$admin->mail;
+    foreach ($admins as $mail){
+      $admin_email .= ', '.$mail;
     }
   }
 
