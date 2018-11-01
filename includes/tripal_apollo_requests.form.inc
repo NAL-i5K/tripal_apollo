@@ -26,22 +26,26 @@ function tripal_apollo_user_table($type) {
   global $user;
   $uid = $user->uid;
 
-  $output = "";
 
+  $base = variable_get('tripal_apollo_base_table');
+  $pid = $base . '_id';
+  $sort_field = "name";
 
+  if ($base == "organism") {
+    $sort_field = "genus";
+  }
   $header = [
 
-    'Name' => ["data" => t('Name'), "field" => "name"],
+    'Name' => ["data" => t('Name'), "field" => "au.name"],
     'Email' => ["data" => t('Email'), "field" => "email"],
-    'Record' => ["data" => t('Record'), "field" => "record_id"],
+    'Record' => ["data" => t('Record'), "field" => 'bt.' . $sort_field],
     'Status' => ["data" => t('Status'), "field" => "status"],
     'Date Created' => [
       "data" => t('Created'),
       "field" => "created",
       'sort' => 'dsc',
     ],
-    'Action' => ["data" => t('Action'), "field" => 'action'],
-
+    'Action',
   ];
 
   $query = db_select("apollo_user_record", "aur")
@@ -57,6 +61,8 @@ function tripal_apollo_user_table($type) {
     'created',
     'apollo_user_id',
   ]);
+  $query->join('chado.' . $base, 'bt', 'aur.record_id = bt.' . $pid);
+  $query->fields('bt', [$sort_field]);
 
 
   if ($type != "all") {
@@ -104,22 +110,11 @@ function tripal_apollo_user_table($type) {
 
     // Fill the table rows
     $user_apollo_id = $data->apollo_user_id;
-
     $path = '/admin/tripal/apollo/users/' . $user_apollo_id;
     $rows[$i][] = l($data->name, $path);
     $rows[$i][] = $data->email;
     $rows[$i][] = $organism_string;
-    $status = '';
-    if ($data->status == 1) {
-      $status = 'Approved';
-    }
-    elseif ($data->status == 0) {
-      $status = 'Rejected';
-    }
-    elseif ($data->status == 2) {
-      $status = 'Pending';
-    }
-    $rows[$i][] = $status;
+    $rows[$i][] = tripal_apollo_convert_status_for_display($data->status);
     $rows[$i][] = date('M d Y h:i:s A', $data->created);
     $rows[$i][] = l(t('Approve/Deny Request'), 'admin/tripal/apollo/requests/' . $data->id);
     $i++;
