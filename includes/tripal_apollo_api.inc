@@ -565,5 +565,23 @@ function tripal_apollo_user_existing_requests_table($au, $header) {
 
   $requests = $query->execute();
 
+}
 
+function tripal_apollo_notify_admins_of_request($type, $record_id,  $form_values) {
+
+  $admin_email = variable_get('site_mail');
+  ;
+  if (function_exists("tripal_hq_permissions_get_admins")) {
+
+    $admins = tripal_hq_permissions_get_admins($record_id, 'organism');
+
+    foreach ($admins as $mail){
+      $admin_email .= ', '.$mail;
+    }
+  }
+
+  $from = $form_values['name'] . "<" . $form_values['mail'] . ">";
+  $sent  = drupal_mail('tripal_apollo', $type, $admin_email, language_default(), $form_values, $from, TRUE);
+
+  return $sent;
 }
