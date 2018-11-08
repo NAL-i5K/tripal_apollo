@@ -4,3 +4,4 @@ web_apollo2/*
 vendor/
 .idea/*
 example_data/yeast/
+docs/_build/*
