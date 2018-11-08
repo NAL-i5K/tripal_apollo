@@ -1,6 +1,11 @@
+.. _ApolloConfig:
+
+
 =====================
 Apollo Configuration
 =====================
+
+
 
 The Tripal Apollo module makes several assumptions about your Apollo instances in order to connect.  If these assumptions dont hold true for your configuration, please let us know on the issue board at https://github.com/NAL-i5K/tripal_apollo/issues and we'll try to help.
 

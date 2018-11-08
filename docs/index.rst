@@ -13,3 +13,4 @@ Welcome to Tripal Apollo's documentation!
   introduction
   installation
   apollo_config
+  development

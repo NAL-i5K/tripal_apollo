@@ -49,7 +49,8 @@ The URL should be the full apollo server URL without a trailing slash, for examp
 
 .. image:: /_static/img/apollo_url.png
 
-Select all of the organisms you would like linked to this Apollo instance.  Note that Apollo 1 mappings for multiple organisms makes several assumptions: see below.
+Select all of the organisms you would like linked to this Apollo instance.  Note that Apollo 1 mappings for multiple organisms makes several assumptions: see  :ref:`ApolloConfig`.
+
 
 
 .. image:: /_static/img/create_apollo_instance.png
