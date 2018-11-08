@@ -38,8 +38,8 @@ Site-wide settings can be set at ``/admin/tripal_apollo``.
   We encourage enabling password encryption.  However, disabling encryption is provided in case of issues setting up the encryption module.  https://www.drupal.org/project/encrypt
 
 
-Creating an Apollo Instance
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Adding an Apollo Instance to Tripal
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 First, you must tell the module about your Apollo server.  To do so, go to **Content --> add Content --> Apollo Instance**.
 
