@@ -67,8 +67,12 @@ function tripal_apollo_node_access($node, $op, $account) {
  */
 function apollo_instance_form($node, &$form_state) {
 
+
   $form = [];
   $form['#validate'] = ['apollo_instance_form_validate'];
+
+  $form['instructions'] = ['#type' => 'fieldset', '#title' => 'Instructions'];
+  $form['instructions']['text'] = ['#markup' => '<p>Please visit <a href="https://tripal-apollo.readthedocs.io/"> the online documentation</a> for this module to learn about setup and assumptions about your Apollo server prior to use.</p>'];
   $form['core'] = [
     '#type' => 'fieldset',
     '#title' => 'General',
@@ -80,6 +84,7 @@ function apollo_instance_form($node, &$form_state) {
     '#required' => TRUE,
     '#default_value' => property_exists($node, 'instance_name') ? $node->instance_name : '',
   ];
+
 
   $form['core']['url'] = [
     '#type' => 'textfield',
@@ -129,9 +134,9 @@ function apollo_instance_form($node, &$form_state) {
 
   $pass_value = NULL;
 
-  $password =  property_exists($node, 'admin_password') ? $node->admin_password  :  null;
+  $password = property_exists($node, 'admin_password') ? $node->admin_password : NULL;
 
-  if ($password){
+  if ($password) {
     $pass_value = tripal_apollo_decrypt($password);
   }
 
