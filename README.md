@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/NAL-i5K/tripal_apollo.svg?branch=master)](https://travis-ci.org/NAL-i5K/tripal_apollo)
+[![Build Status](https://travis-ci.org/NAL-i5K/tripal_apollo.svg?branch=master)](https://travis-ci.org/NAL-i5K/tripal_apollo) [![Documentation Status](https://readthedocs.org/projects/tripal-apollo/badge/?version=latest)](https://tripal-apollo.readthedocs.io/en/latest/?badge=latest)
 
-[![Documentation Status](https://readthedocs.org/projects/tripal-apollo/badge/?version=latest)](https://tripal-apollo.readthedocs.io/en/latest/?badge=latest)
+![Tripal logo](/docs/_static/tripal_logo.png) ![Apollo logo](/docs/_static/apollo_logo.png)
 
 
 The Tripal Apollo module seeks to bridge Tripal and Apollo user and data management for both Apollo 1 and 2.
