@@ -23,11 +23,11 @@ http://genomearchitect.github.io/
 
 Users visit `/apollo-registration` and select which organisms they would like access to.
 
-![user regisrtation form](docs/registration_page.png)
+![user regisrtation form](docs/_static/img/registration_page.png)
 
 An email is sent to the user and the site admin email notifying them of the request.
 
-![admin requests](docs/admin_requests.png)
+![admin requests](docs/_static/img/admin_requests.png)
 
 ### Approving/denying requests
 
@@ -35,7 +35,7 @@ Registration requests appear at `admin/tripal/apollo/requests`.
 
 Each row is for a single user - organism request pairing, so a single form submission may consist of several rows.  The admin can click the "Approve/Deny" button to view the request, which will list the user name, email, organism.  To approve or reject the request, check the appropriate box and click **Save**.
 .
-![approving a request](docs/approve_request.png)
+![approving a request](docs/_static/img/approve_request.png)
 
 
 # Admin setup
@@ -52,7 +52,7 @@ Python path is only necessary for Apollo 1.
 
 **Important notice!!!**  Switching base tables will **wipe all information linking instances to records and records to users**.  Be very mindful of changing this setting!
 
-![admin area](docs/admin_area.png)
+![admin area](docs/_static/img/admin_area.png)
 
 Note that we encourage enabling encryption of passwords.  However, disabling encryption is provided in case of issues setting up the encryption module.
 
@@ -64,11 +64,11 @@ If your server is Apollo 1, you will need to provide the db name, db admin name 
 
 The URL should be the full apollo server URL without a trailing slash, for example,  `http://localhost:8888`.  The correct URL is listed in your web services API on your apollo server:
 
-![apollo url](docs/apollo_url.png)
+![apollo url](docs/_static/img/apollo_url.png)
 
 Select all of the organisms you would like linked to this Apollo instance.  Note that Apollo 1 mappings for multiple organisms makes several assumptions: see below.
 
-![create apolllo instance](docs/create_apollo_instance.png)
+![create apolllo instance](docs/_static/img/create_apollo_instance.png)
 
 
 If your instance is successfully linked, the "Users" field will display the number of non-admin users on your instance.  
@@ -81,7 +81,7 @@ This module defines the following permissions:
 * administer apollo users.  Allows admins to approve/deny apollo access requests.  This permission is for site admins and/or community leaders.
  * access apollo: allows users to make apollo registration requests.  You can give this permission to anonymous users, allowing users to register for apollo accounts without a Drupal account.
 
-To learn more about setting up permissions and roles, please see https://www.drupal.org/docs/7/managing-users/user-roles
+To learn more about setting up permissions and roles, please see https://www.drupal.org/docs/_static/img/7/managing-users/user-roles
 
 ## Chado specific permissions
 
