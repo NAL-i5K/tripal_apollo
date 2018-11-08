@@ -8,7 +8,8 @@ Welcome to Tripal Apollo's documentation!
 
 .. toctree::
   :maxdepth: 2
-  :caption: COntents:
+  :caption: Documentation:
 
+  introduction
   installation
   user_guide
