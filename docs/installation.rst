@@ -14,29 +14,29 @@ Site-wide settings
 
 Site-wide settings can be set at ``/admin/tripal_apollo``.
 
-.. csv-table: Site-Wide settings
-:header: "Field", "Description"
-
-  "test_gene_1", "blue"
-  "test_gene_2", "red"
-
-
-
-
-
-Python path is only necessary for Apollo 1.
-
-
 .. image:: /_static/img/admin_area.png
 
+
+.. csv-table:: Site-Wide Settings
+  :header: "Field", "Description"
+
+  "Python Path", "Full path to python executable on the server.  Only necessary for Apollo 1."
+  "Chado Base Table", "Determine what content will link to Apollo.  Set to organism by default.  Please see warning below regarding changing the base table."
+  "Encrypt Passwords", "Should user and admin passwords be encrypted when stored in the database?  If your site is hacked, this will make user passwords more secure."
+
+
+.. note::
+
+	 Python path is only necessary for Apollo 1.
 
 
 .. warning::
 
   **Important notice!!!**  Switching base tables will **wipe all information linking instances to records and records to users**.  Be very mindful of changing this setting!
 
+.. note::
+  We encourage enabling password encryption.  However, disabling encryption is provided in case of issues setting up the encryption module.  https://www.drupal.org/project/encrypt
 
-Note that we encourage enabling encryption of passwords.  However, disabling encryption is provided in case of issues setting up the encryption module.
 
 Creating an Apollo Instance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
