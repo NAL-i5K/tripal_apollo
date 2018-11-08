@@ -47,12 +47,12 @@ If your server is Apollo 1, you will need to provide the db name, db admin name 
 
 The URL should be the full apollo server URL without a trailing slash, for example,  ``http://localhost:8888``.  The correct URL is listed in your web services API on your apollo server:
 
-![apollo url](docs/_static/img/apollo_url.png)
+.. image:: /_static/img/apollo_url.png
 
 Select all of the organisms you would like linked to this Apollo instance.  Note that Apollo 1 mappings for multiple organisms makes several assumptions: see below.
 
-![create apolllo instance](docs/_static/img/create_apollo_instance.png)
 
+.. image:: /_static/img/create_apollo_instance.png
 
 If your instance is successfully linked, the "Users" field will display the number of non-admin users on your instance.
 
@@ -73,60 +73,13 @@ Chado specific permissions
 
 If you have the ``tripal_hq`` and ``tripal_hq_permissions`` modules enabled, you can use Chado-specific permissions!  This means you can have a user role that can, for example, approve Apollo requests for a subset of organisms **only**.  Simply configure HQ permissions for curators based on chado **organisms**.
 
-Please see the [``tripal_hq`` module for more information](https://github.com/statonlab/tripal_hq).
+Please see the ``tripal_hq`` module for more information: https://github.com/statonlab/tripal_hq.
 
 Apollo 1 setup
 -----------------------
 
-
 Apollo 1 does not support a REST API.  Your Apollo 1 server's database must therefore be setup to accept remote connections by editing ``pg_hba.conf``.
 
-
-Testing and development
------------------------
-
-The travis CI environment uses the Docker compose file in this repository to launch a Tripal site and Apollo site. An example setup:
-
-.. code-block:: bash
-
-  # extract the example dataset
-  tar -xvf example_data/yeast.tar.gz -C example_data/
-  composer install
-  docker-compose up -d
-  ## Set the APOLLO_URL variable.
-  APOLLO_URL=http://localhost:8888
-  export APOLLO_URL
-  /bin/bash setup/set_travis_apollo.sh
-
-If you only need an Apollo container, it can be run via ``docker run``:
-
-.. code-block:: bash
-
-  # extract the example dataset
-  tar -xvf example_data/yeast.tar.gz -C example_data/
-  # run an Apollo container
-  docker run -it -v ${PWD}/example_data/:/data  -p 8888:8080 quay.io/gmod/docker-apollo:2.1.0
-
-  ## Set the APOLLO_URL variable.
-  APOLLO_URL=http://localhost:8888
-  export APOLLO_URL
-  #run the setup script, which will create the organism and groups in the Apollo instance.
-  /bin/bash setup/set_travis_apollo.sh
-
-
-.. note::
-
-  The Apollo credentials for this container are:
-
-  * username: admin@local.host
-  * password: password
-
-Setting up Test Suite
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Prior to running test suite, you must run ``composer install`` and copy ``tests/example.env`` to ``tests/.env``.  Note we define an extra variable in ``tests/example.env``: ``APOLLO_URL=http://localhost:8888``.  This **MUST** include ``http`` and it must point at your Apollo instance for tests to work.
-
-See https://tripaltestsuite.readthedocs.io/en/latest/environment.html?highlight=.env for general information on setting up Test Suite.
 
 References
 ---------------
