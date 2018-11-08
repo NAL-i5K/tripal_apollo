@@ -21,7 +21,7 @@ To learn more, visit:
 
 http://genomearchitect.github.io/
 
- What does Tripal Apollo do?
+What does Tripal Apollo do?
 -----------------------------
 
 User account requests
@@ -42,11 +42,9 @@ Approving/denying requests
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-Registration requests appear at `admin/tripal/apollo/requests`.
+Registration requests appear at ``admin/tripal/apollo/requests``.
 
-Each row is for a single user - organism request pairing, so a single form submission may consist of several rows.  The admin can click the "Approve/Deny" button to view the request, which will list the user name, email, organism.  To approve or reject the request, check the appropriate box and click **Save**.
-.
+Each row is for a single user - organism request pairing, so a single form submission may consist of several rows.  The admin can click the **Approve/Deny** button to view the request, which will list the user name, email, organism.  To approve or reject the request, check the appropriate box and click **Save**.
+
 
 .. image:: /_static/img/approve_request.png
-
-![approving a request](docs/_static/img/approve_request.png)
