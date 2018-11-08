@@ -12,4 +12,4 @@ Welcome to Tripal Apollo's documentation!
 
   introduction
   installation
-  user_guide
+  apollo_config
