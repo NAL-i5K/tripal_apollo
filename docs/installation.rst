@@ -75,11 +75,6 @@ If you have the ``tripal_hq`` and ``tripal_hq_permissions`` modules enabled, you
 
 Please see the ``tripal_hq`` module for more information: https://github.com/statonlab/tripal_hq.
 
-Apollo 1 setup
------------------------
-
-Apollo 1 does not support a REST API.  Your Apollo 1 server's database must therefore be setup to accept remote connections by editing ``pg_hba.conf``.
-
 
 References
 ---------------
