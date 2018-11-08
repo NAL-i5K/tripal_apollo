@@ -5,3 +5,4 @@ vendor/
 .idea/*
 example_data/yeast/
 docs/_build/*
+.DS_Store
