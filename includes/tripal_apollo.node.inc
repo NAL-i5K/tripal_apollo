@@ -91,7 +91,7 @@ function apollo_instance_form($node, &$form_state) {
     '#title' => t("URL of Apollo Server"),
     '#required' => TRUE,
     '#default_value' => property_exists($node, 'url') ? $node->url : '',
-    '#description' => 'The apollo API URL.  This can be found at /WebServices/ on your apollo server.  A valid example is http://localhost:8888',
+    '#description' => 'The apollo API URL (Note: MUST include http://).  This can be found at /WebServices/ on your apollo server.  A valid example is http://localhost:8888',
   ];
 
 
