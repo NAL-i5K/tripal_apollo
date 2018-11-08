@@ -1,6 +1,5 @@
 .. _ApolloConfig:
 
-
 =====================
 Apollo Configuration
 =====================
@@ -11,20 +10,21 @@ The Tripal Apollo module makes several assumptions about your Apollo instances i
 
 
 Apollo 2
-----------
+=========
+
 
 Expected Group Names
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 Tripal Apollo does not configure your user groups for you.  Tripal Apollo assumes that for each organism, with a particular genus and species, you have three groups: ``genus_species_ADMIN``, ``genus_species_USER``, and ``genus_species_WRITE``.  This is typically done when adding the organism to Apollo.  For this module to function to correctly, the organism you create on your Tripal site much have genus and species fields which match the existing groups on your Apollo instance.
 
 The organism *Saccharocmyes cerevisiae* should therefore have groups configured ``saccharomyces_cerevisiae_WRITE``, ``saccharomyces_cerevisiae_USER``, and ``saccharomyces_cerevisiae_ADMIN``.  Approving a user request for this organism will add them to the first two.
 
 Apollo 1
-----------
+==========
 
 Server Setup
-~~~~~~~~~~~~~
+--------------
 
 Apollo 1 does not support a REST API.  Your Apollo 1 server's database must therefore be setup to accept remote connections by editing ``pg_hba.conf``.
 

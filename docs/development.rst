@@ -1,16 +1,15 @@
-
 ======================================
 Testing, Development, and Contributing
-=======================================
+======================================
 
 Testing
---------
+========
 
 Tripal Apollo uses Tripal Test Suite to make configuring PHPUnit to work with Drupal and Tripal easy.  Tripal Test Suite documentation is available here: https://tripaltestsuite.readthedocs.io/en/latest/
 
 
 Creating a Development Environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------
 
 The travis CI environment uses the Docker compose file in this repository to launch a Tripal site and Apollo site.  You can simply use this configuration locally!
 
@@ -52,7 +51,7 @@ If you only need an Apollo container, it can be run via ``docker run``:
   * password: password
 
 Setting up Tripal Test Suite
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 
 Prior to running test suite, you must run ``composer install`` and copy ``tests/example.env`` to ``tests/.env``.  Note we define an extra variable in ``tests/example.env``: ``APOLLO_URL=http://localhost:8888``.  This **MUST** include ``http://`` and it must point at your Apollo instance for tests to work.
 
@@ -60,6 +59,6 @@ See https://tripaltestsuite.readthedocs.io/en/latest/environment.html?highlight=
 
 
 Contributing
---------------
+=============
 
 Tripal Apollo is open source and distributed via the GPL 3 license.  If you have questions, feature requests, or a desire to contribute, please post to the github issues board here: https://github.com/NAL-i5K/tripal_apollo/issues
