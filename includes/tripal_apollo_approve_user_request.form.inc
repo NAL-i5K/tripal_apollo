@@ -189,10 +189,31 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
   } // Status approved condition ends here
 
   elseif ($status == 0) {
+
+    $prev_status = db_select('apollo_user_record', 't')
+    ->fields('t', ['status' => $status])
+      ->condition('id', $submission_id)
+      ->execute();
+
+    if (!$prev_status == 1){
+      //We are rejecting a previously accepted user.  Remove their permissions.
+
+     $success= tripal_apollo_rescind_user_permissions($submission_id, $instance_info->id);
+
+     if (!$success){
+
+       tripal_set_message(t('There was an error removing the apollo rights for %name.', ['%name' => $values['name']]), TRIPAL_ERROR);
+       //return before updating status
+       return;
+     }
+    }
+
     db_update('apollo_user_record')
       ->fields(['status' => $status])
       ->condition('id', $submission_id)
       ->execute();
+
+
     drupal_set_message(t('The apollo request for %name has been successfuly rejected.', ['%name' => $values['name']]), $type = 'status');
   }
   $form_state['redirect'] = 'admin/tripal/apollo/requests';
