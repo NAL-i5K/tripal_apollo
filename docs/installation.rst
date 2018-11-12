@@ -9,6 +9,10 @@ Download the module using git (``git clone https://github.com/NAL-i5K/tripal_apo
 
 User passwords are generated using the ``/usr/share/dict/words`` file.  If this file doesn't exist on your server, please create it and populate with words you would like your user passwords generated with (one word per line).
 
+.. warning::
+
+	If your ``/usr/share/dict/words`` file does not exist, or does not contain new-line separated words, this module will crash on form submission.
+
 Site-wide settings
 -----------------------
 
