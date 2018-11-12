@@ -629,7 +629,7 @@ function tripal_apollo_rescind_user_permissions($submission_id, $instance_id) {
 
   $query = db_select('apollo_user_record', 'aur');
     $query->fields('aur', ['record_id']);
-  $query->join('apollo_user', 'au');
+  $query->join('apollo_user', 'au', 'au.id = aur.apollo_user_id');
   $query->addField('au', 'email');
   $query->condition('aur.id', $submission_id);
 
