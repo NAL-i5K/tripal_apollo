@@ -76,6 +76,9 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $submissio
   $instance_id = $result->id;
 
 
+  $instance_info = tripal_apollo_get_instance($instance_id);
+
+
   $form['web_apollo_table']['instance_id'] = [
     '#type' => 'value',
     '#value' => $instance_id,
@@ -98,10 +101,20 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $submissio
     $status = 'Rejected';
   }
 
+  $options = [t('Reject'), t('Approve')];
+
+  //dont allow reject if already approved for Apollo 1.
+
+
+  if ($instance_info->version == 1 && $data->status == 1){
+
+    $options = [t('Approve')];
+  }
+
   $form['web_apollo_table']['status'] = [
     '#type' => 'radios',
     '#default_value' => $data->status,
-    '#options' => [t('Reject'), t('Approve')],
+    '#options' => $options,
   ];
 
   //TODO:  this is not the drupal uid.  Rename the value (here and in theme file)
