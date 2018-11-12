@@ -86,44 +86,76 @@ class tripal_apollo_api_Test extends TripalTestCase {
 
   }
 
-//
-//  /**
-//   * Purge user is currently on hold.  See @ticket 58.
-//   * @group wip
-//   */
-//  public function test_tripal_apollo_purge_user() {
-//
-//    $url = $url = getenv('APOLLO_URL');
-//
-//    $info = $this->add_user_with_permission();
-//
-//    $auid = $info['apollo_user_id'];
-//
-//    $response = tripal_apollo_purge_user($auid);
-//
-//
-//    var_dump($response);
-//    $this->assertTrue($response, 'purge user API returned error');
-//
-//    $instance = db_select('apollo_instance', 't')
-//      ->fields('t')
-//      ->condition('url', $url)
-//      ->execute()
-//      ->fetchObject();
-//
-//    $users = tripal_apollo_get_users($instance->id);
-//
-//    $has_user = FALSE;
-//
-//    foreach ($users as $user) {
-//      if ($user->firstName == 'walrus') {
-//        $has_user = TRUE;
-//      }
-//    }
-//
-//    $this->assertFalse($has_user);
-//
-//  }
+  //
+  //  /**
+  //   * Purge user is currently on hold.  See @ticket 58.
+  //   * @group wip
+  //   */
+  //  public function test_tripal_apollo_purge_user() {
+  //
+  //    $url = $url = getenv('APOLLO_URL');
+  //
+  //    $info = $this->add_user_with_permission();
+  //
+  //    $auid = $info['apollo_user_id'];
+  //
+  //    $response = tripal_apollo_purge_user($auid);
+  //
+  //
+  //    var_dump($response);
+  //    $this->assertTrue($response, 'purge user API returned error');
+  //
+  //    $instance = db_select('apollo_instance', 't')
+  //      ->fields('t')
+  //      ->condition('url', $url)
+  //      ->execute()
+  //      ->fetchObject();
+  //
+  //    $users = tripal_apollo_get_users($instance->id);
+  //
+  //    $has_user = FALSE;
+  //
+  //    foreach ($users as $user) {
+  //      if ($user->firstName == 'walrus') {
+  //        $has_user = TRUE;
+  //      }
+  //    }
+  //
+  //    $this->assertFalse($has_user);
+  //
+  //  }
+
+
+  public function test_tripal_apollo_rescind_user_permissions() {
+
+    $url = getenv('APOLLO_URL');
+
+    $info = $this->add_user_with_permission();
+
+    $submission_id = $info['apollo_user_record'];
+
+    $instance = db_select('apollo_instance', 't')
+      ->fields('t')
+      ->condition('url', $url)
+      ->execute()
+      ->fetchObject();
+
+    tripal_apollo_rescind_user_permissions($submission_id, $instance->id);
+
+
+
+    $user_info = db_select('apollo_user', 't')
+      ->fields('t')
+      ->condition('email', 'this_email_shouldnt_exist@never_gonna_happen.com')
+      ->execute()
+      ->fetchObject();
+
+    $users = tripal_apollo_get_users($instance->id, $user_info->id);
+
+    $this->assertEmpty($users);
+
+
+  }
 
   private function add_user_with_permission() {
 
@@ -154,7 +186,7 @@ class tripal_apollo_api_Test extends TripalTestCase {
       ->fields([
         'record_id' => $info['organism'],
         'apollo_user_id' => $user,
-        'status' => '2',
+        'status' => '1',
       ])
       ->execute();
 
@@ -171,7 +203,7 @@ class tripal_apollo_api_Test extends TripalTestCase {
 
     chdir($curr_dir);
 
-    return ['apollo_user_id' => $user];
+    return ['apollo_user_id' => $user, 'apollo_user_record' => $aur];
 
   }
 }
