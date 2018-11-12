@@ -76,6 +76,9 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $submissio
   $instance_id = $result->id;
 
 
+  $instance_info = tripal_apollo_get_instance($instance_id);
+
+
   $form['web_apollo_table']['instance_id'] = [
     '#type' => 'value',
     '#value' => $instance_id,
@@ -98,10 +101,20 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $submissio
     $status = 'Rejected';
   }
 
+  $options = [t('Reject'), t('Approve')];
+
+  //dont allow reject if already approved for Apollo 1.
+
+
+  if ($instance_info->apollo_version == 1 && $data->status == 1){
+
+    $options = [t('Approve')];
+  }
+
   $form['web_apollo_table']['status'] = [
     '#type' => 'radios',
     '#default_value' => $data->status,
-    '#options' => [t('Reject'), t('Approve')],
+    '#options' => $options,
   ];
 
   //TODO:  this is not the drupal uid.  Rename the value (here and in theme file)
@@ -161,6 +174,7 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
   //one record = one instance, so only 1 result
   $instance_info = $query->execute()->fetchObject();
 
+
   if (($status_res != $status) && ($status == 1)) {//User is approved.
 
     //execute python scripts
@@ -188,7 +202,27 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
     ]), $type = 'status');
   } // Status approved condition ends here
 
-  elseif ($status == 0) {
+  elseif ($status == 0 && $status_res ==1) {
+
+      //We are rejecting a previously accepted user.  Remove their permissions.
+
+     $success= tripal_apollo_rescind_user_permissions($submission_id, $instance_info->id);
+
+     if (!$success){
+       tripal_set_message(t('There was an error removing the apollo rights for %name.', ['%name' => $values['name']]), TRIPAL_ERROR);
+       //return before updating status
+       return;
+     }
+
+    db_update('apollo_user_record')
+      ->fields(['status' => $status])
+      ->condition('id', $submission_id)
+      ->execute();
+    drupal_set_message(t('The apollo request for %name has been successfuly rejected.', ['%name' => $values['name']]), $type = 'status');
+    }
+
+    else {
+
     db_update('apollo_user_record')
       ->fields(['status' => $status])
       ->condition('id', $submission_id)

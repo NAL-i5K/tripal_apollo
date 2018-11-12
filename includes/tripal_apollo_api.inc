@@ -129,21 +129,8 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   //For now we assume the group base is genus_species
   //see @ticket 41
   $record = $values['organism_key'];
-  $base = variable_get('tripal_apollo_base_table');
 
-  if ($base == 'organism') {
-    $organism = chado_select_record('organism', [
-      'genus',
-      'species',
-    ], ['organism_id' => $record]);
-    $organism = $organism[0];
-    $group_base = $organism->genus . '_' . $organism->species;
-  }
-  else {//todo: how would one want analysis or project supported?
-    $object = chado_select_record($base, ['name'], [$base . '_id' => $record]);
-    $object = $object[0];
-    $group_base = $object->name;
-  }
+  $group_base = tripal_apollo_build_group_string_base($record);
 
   $user_pass = tripal_apollo_decrypt($values['pass']);
 
@@ -192,6 +179,45 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
 
   }
   return TRUE;
+}
+
+
+/**
+ * Build the group base string.  General assumption is for genus_species of
+ * organism.
+ *
+ * @ticket 41
+ *
+ * @param $record_id
+ *
+ * @return string
+ */
+function tripal_apollo_build_group_string_base($record_id) {
+  //For now we assume the group base is genus_species
+  //see @ticket 41
+  // $record_id = $values['organism_key'];
+  $base = variable_get('tripal_apollo_base_table');
+
+  if ($base == 'organism') {
+    $organism = chado_select_record('organism', [
+      'genus',
+      'species',
+    ], ['organism_id' => $record_id]);
+
+    if (empty($organism)) {
+      tripal_set_message(t("Unable to find organism for !record", ['!record' => $record_id]), TRIPAL_ERROR);
+      return FALSE;
+    }
+    $organism = $organism[0];
+    $group_base = $organism->genus . '_' . $organism->species;
+  }
+  else {//todo: how would one want analysis or project supported?
+    $object = chado_select_record($base, ['name'], [$base . '_id' => $record_id]);
+    $object = $object[0];
+    $group_base = $object->name;
+  }
+
+  return $group_base;
 }
 
 
@@ -567,21 +593,93 @@ function tripal_apollo_user_existing_requests_table($au, $header) {
 
 }
 
-function tripal_apollo_notify_admins_of_request($type, $record_id,  $form_values) {
+function tripal_apollo_notify_admins_of_request($type, $record_id, $form_values) {
 
-  $admin_email = variable_get('site_mail');
-  ;
+  $admin_email = variable_get('site_mail');;
   if (function_exists("tripal_hq_permissions_get_admins")) {
 
     $admins = tripal_hq_permissions_get_admins($record_id, 'organism');
 
-    foreach ($admins as $mail){
-      $admin_email .= ', '.$mail;
+    foreach ($admins as $mail) {
+      $admin_email .= ', ' . $mail;
     }
   }
 
   $from = $form_values['name'] . "<" . $form_values['mail'] . ">";
-  $sent  = drupal_mail('tripal_apollo', $type, $admin_email, language_default(), $form_values, $from, TRUE);
+  $sent = drupal_mail('tripal_apollo', $type, $admin_email, language_default(), $form_values, $from, TRUE);
 
   return $sent;
+}
+
+
+/**
+ * Retroactively remove permissions from a user for a specific submission
+ * request.
+ *
+ * @param $submission_id | Apollo user record submission ID
+ * @param $instance_id | Instance ID.
+ *
+ * //TODO:  no reason instance id shouldnt be nullable
+ *
+ * @return bool
+ */
+function tripal_apollo_rescind_user_permissions($submission_id, $instance_id) {
+
+  //get group info for this submission
+
+  $query = db_select('apollo_user_record', 'aur');
+    $query->fields('aur', ['record_id']);
+  $query->join('apollo_user', 'au', 'au.id = aur.apollo_user_id');
+  $query->addField('au', 'email');
+  $query->condition('aur.id', $submission_id);
+
+  $results = $query->execute()->fetchObject();
+
+
+  $user_mail = $results->email;
+  $record_id = $results->record_id;
+
+  $base = tripal_apollo_build_group_string_base($record_id);
+  //get instance
+
+  $groups = [$base . '_USER', $base . '_WRITE'];
+  $instance = tripal_apollo_get_instance($instance_id);
+
+
+  if ($instance->apollo_version == 1) {
+    tripal_set_message(t("Cannot change group permissions for Apollo 1 instance: !name", ['!name' => $instance->name]), TRIPAL_WARNING);
+    return FALSE;
+  }
+
+  $address = $instance->url . '/user/removeUserFromGroup';
+  $password = tripal_apollo_decrypt($instance->admin_password);
+
+  $headers = ['Content-Type' => 'application/json'];
+  $method = 'POST';
+
+  foreach ($groups as $group) {
+
+    $data = [
+      'username' => $instance->admin_name,
+      'password' => $password,
+      'group' => $group,
+      'user' => $user_mail,
+    ];
+
+    $options = [
+      'headers' => $headers,
+      'method' => $method,
+      'data' => json_encode($data),
+    ];
+
+    $response = drupal_http_request($address, $options);
+
+    if ($response->code != '200') {
+      tripal_log('Error creating group', TRIPAL_ERROR);
+      return FALSE;
+    }
+
+  }
+  return TRUE;
+
 }
