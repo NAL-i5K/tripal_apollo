@@ -106,7 +106,7 @@ function tripal_apollo_approve_user_request_form($form, &$form_state, $submissio
   //dont allow reject if already approved for Apollo 1.
 
 
-  if ($instance_info->version == 1 && $data->status == 1){
+  if ($instance_info->apollo_version == 1 && $data->status == 1){
 
     $options = [t('Approve')];
   }
@@ -174,6 +174,7 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
   //one record = one instance, so only 1 result
   $instance_info = $query->execute()->fetchObject();
 
+
   if (($status_res != $status) && ($status == 1)) {//User is approved.
 
     //execute python scripts
@@ -201,32 +202,31 @@ function tripal_apollo_approve_user_request_form_submit($form, &$form_state) {
     ]), $type = 'status');
   } // Status approved condition ends here
 
-  elseif ($status == 0) {
+  elseif ($status == 0 && $status_res ==1) {
 
-    $prev_status = db_select('apollo_user_record', 't')
-    ->fields('t', ['status' => $status])
-      ->condition('id', $submission_id)
-      ->execute();
-
-    if (!$prev_status == 1){
       //We are rejecting a previously accepted user.  Remove their permissions.
 
      $success= tripal_apollo_rescind_user_permissions($submission_id, $instance_info->id);
 
      if (!$success){
-
        tripal_set_message(t('There was an error removing the apollo rights for %name.', ['%name' => $values['name']]), TRIPAL_ERROR);
        //return before updating status
        return;
      }
-    }
 
     db_update('apollo_user_record')
       ->fields(['status' => $status])
       ->condition('id', $submission_id)
       ->execute();
+    drupal_set_message(t('The apollo request for %name has been successfuly rejected.', ['%name' => $values['name']]), $type = 'status');
+    }
 
+    else {
 
+    db_update('apollo_user_record')
+      ->fields(['status' => $status])
+      ->condition('id', $submission_id)
+      ->execute();
     drupal_set_message(t('The apollo request for %name has been successfuly rejected.', ['%name' => $values['name']]), $type = 'status');
   }
   $form_state['redirect'] = 'admin/tripal/apollo/requests';

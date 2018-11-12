@@ -645,6 +645,7 @@ function tripal_apollo_rescind_user_permissions($submission_id, $instance_id) {
   $groups = [$base . '_USER', $base . '_WRITE'];
   $instance = tripal_apollo_get_instance($instance_id);
 
+
   if ($instance->apollo_version == 1) {
     tripal_set_message(t("Cannot change group permissions for Apollo 1 instance: !name", ['!name' => $instance->name]), TRIPAL_WARNING);
     return FALSE;

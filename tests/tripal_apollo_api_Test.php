@@ -152,8 +152,23 @@ class tripal_apollo_api_Test extends TripalTestCase {
 
     $users = tripal_apollo_get_users($instance->id, $user_info->id);
 
-    $this->assertEmpty($users);
+    //user should exist, but iwthout the groups
 
+$user = $users[0];
+
+$permissions = $user->organismPermissions;
+
+$new_perms = [];
+
+foreach ($permissions as $permission){
+
+  if ($permission->organism == 'yeast'){
+    $new_perms = $permission->permissionArray;
+  }
+
+  $this->assertEmpty($new_perms);
+  
+}
 
   }
 
