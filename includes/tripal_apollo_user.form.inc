@@ -67,9 +67,8 @@ function tripal_apollo_user_form($form, &$form_state, $auid) {
 
 
   $form['instructions'] = [
-    '#markup' => '<p><b>Warning!</b>  Deleting this user will delete all their requests and all accounts across all instances.</p><p>Please note this will not delete the associated Drupal user.</p>
+    '#markup' => '<p><b>Warning!</b>  Deleting this user will delete all their requests and all accounts across all instances.</p><p>Please note this will not delete the associated Drupal user.</p>'
 
-<p>For now the delete user functionality is under development and disabled.</p>',
   ];
 
 
@@ -100,10 +99,8 @@ function tripal_apollo_user_delete($form, &$form_state) {
   if (!$result) {
     tripal_set_message('Error: could not delete user from Apollo instances', TRIPAL_ERROR);
   }
-  //Now: delete all apollo_user based records.
-  db_delete('apollo_user')
-    ->condition('id', $auid)
-    ->execute();
+
+
 
   $form_state['redirect'] = variable_get('site_frontpage');
 

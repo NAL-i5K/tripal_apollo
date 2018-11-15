@@ -398,12 +398,16 @@ function tripal_apollo_one_build_url($url, $record_id, $instance_id) {
 }
 
 /**
+ * Removes a user from all groups.
+ *
  * @param $auid apollo user id
  */
 function tripal_apollo_purge_user($auid) {
 
+
   $query = db_select('apollo_user_record', 'aur');
   $query->condition('aur.apollo_user_id', $auid);
+  $query->fields('aur', ['id']);
   $query->join('apollo_user', 'au', 'aur.apollo_user_id = au.id');
   $query->fields('au', ['email']);
   $query->join('apollo_instance_record', 'air', 'air.record_id = aur.record_id');
@@ -411,49 +415,36 @@ function tripal_apollo_purge_user($auid) {
   $results = $query->execute();
 
 
-  $path = '/user/deleteUser';
+  //Track what was successful so we can update the status for those if we fail along the way.
+  $successes = [];
 
   foreach ($results as $result) {
 
-    $instance = tripal_apollo_get_instance($result->instance_id);
-    $password = tripal_apollo_decrypt($instance->admin_password);
-    $address = $instance->url . $path;
+    $success = tripal_apollo_rescind_user_permissions($result->id, $result->instance_id);
 
-    $headers = ['Content-Type' => 'application/json'];
-    $method = 'POST';
-    $data = ['username' => $instance->admin_name, 'password' => $password];
-    $data['userToDelete'] = $result->email;
+    if (!$success) {
 
-    $options = [
-      'headers' => $headers,
-      'method' => $method,
-      'data' => json_encode($data),
-    ];
+      tripal_set_message(t('Unable to rescind permissions for request !id', ['!id' => $result->id]), TRIPAL_ERROR);
 
-    $response = drupal_http_request($address, $options);
 
-    //error check here
-    if ($response->code != "200") {
-      tripal_log(t('Error: Bad response from Apollo instance !id, code: !code.  Message: !message', [
-        '!id' => $instance->id,
-        '!code' => $response->code,
-        '!message' => $response->error,
-      ]), TRIPAL_ERROR);
+      db_update('apollo_user_record')
+        ->fields(['status' => 0])
+        ->condition('apollo_user_id', $auid)
+        ->condition('id', $successes, "IN")
+        ->execute();
+      
       return FALSE;
     }
 
-    $data = json_decode($response->data);
-
-    if (isset($data->error)) {
-      tripal_log(t('Error: Bad response from Apollo instance !id, code: !code.  Message: !message', [
-        '!id' => $instance->id,
-        '!code' => $response->code,
-        '!message' => $data->error,
-      ]), TRIPAL_ERROR);
-      return FALSE;
-
-    }
+    $successes[] = $result->id;
   }
+
+  db_update('apollo_user_record')
+    ->fields(['status' => 0])
+    ->condition('apollo_user_id', $auid)
+    ->execute();
+
+
   return TRUE;
 }
 
@@ -628,7 +619,7 @@ function tripal_apollo_rescind_user_permissions($submission_id, $instance_id) {
   //get group info for this submission
 
   $query = db_select('apollo_user_record', 'aur');
-    $query->fields('aur', ['record_id']);
+  $query->fields('aur', ['record_id']);
   $query->join('apollo_user', 'au', 'au.id = aur.apollo_user_id');
   $query->addField('au', 'email');
   $query->condition('aur.id', $submission_id);
