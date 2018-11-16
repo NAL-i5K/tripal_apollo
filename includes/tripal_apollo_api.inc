@@ -404,7 +404,6 @@ function tripal_apollo_one_build_url($url, $record_id, $instance_id) {
  */
 function tripal_apollo_purge_user($auid) {
 
-
   $query = db_select('apollo_user_record', 'aur');
   $query->condition('aur.apollo_user_id', $auid);
   $query->fields('aur', ['id']);
@@ -413,7 +412,6 @@ function tripal_apollo_purge_user($auid) {
   $query->join('apollo_instance_record', 'air', 'air.record_id = aur.record_id');
   $query->fields('air', ['instance_id']);
   $results = $query->execute();
-
 
   //Track what was successful so we can update the status for those if we fail along the way.
   $successes = [];
@@ -426,24 +424,27 @@ function tripal_apollo_purge_user($auid) {
 
       tripal_set_message(t('Unable to rescind permissions for request !id', ['!id' => $result->id]), TRIPAL_ERROR);
 
-
+      //update any succesful removals: if no successes just exit.
+      if (empty($successes)){
+        return FALSE;
+      }
       db_update('apollo_user_record')
         ->fields(['status' => 0])
         ->condition('apollo_user_id', $auid)
         ->condition('id', $successes, "IN")
         ->execute();
-      
+
       return FALSE;
     }
 
     $successes[] = $result->id;
   }
 
+  //no failures, so update all for this user to rejected.
   db_update('apollo_user_record')
     ->fields(['status' => 0])
     ->condition('apollo_user_id', $auid)
     ->execute();
-
 
   return TRUE;
 }
