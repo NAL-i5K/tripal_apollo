@@ -14,3 +14,5 @@ Welcome to Tripal Apollo's documentation!
   installation
   apollo_config
   development
+  anonymous_requests
+  customizing_this_module

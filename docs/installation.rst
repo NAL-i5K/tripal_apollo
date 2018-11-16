@@ -55,8 +55,6 @@ The URL should be the full apollo server URL without a trailing slash, for examp
 
 Select all of the organisms you would like linked to this Apollo instance.  Note that Apollo 1 mappings for multiple organisms makes several assumptions: see  :ref:`ApolloConfig`.
 
-
-
 .. image:: /_static/img/create_apollo_instance.png
 
 If your instance is successfully linked, the "Users" field will display the number of non-admin users on your instance.
@@ -67,10 +65,13 @@ Permissions
 This module defines the following permissions:
 
 * administer tripal apollo: Administer the module itself.  This permission is for site admins.
-* administer apollo users.  Allows admins to approve/deny apollo access requests.  This permission is for site admins and/or community leaders.
- * access apollo: allows users to make apollo registration requests.  You can give this permission to anonymous users, allowing users to register for apollo accounts without a Drupal account.
+* administer apollo users.  Allows admins to approve/deny Apollo access requests.  This permission is for site admins and/or community leaders.
+* access apollo: allows users to make Apollo registration requests.  You can give this permission to anonymous users, allowing users to register for apollo accounts without a Drupal account.
 
 To learn more about setting up permissions and roles, please see https://www.drupal.org/docs/_static/img/7/managing-users/user-roles
+
+To learn more about the consequences of allowing anonymous users to make Apollo requests, see here: :ref:`permissions_guide`.
+
 
 Chado specific permissions
 ---------------------------
