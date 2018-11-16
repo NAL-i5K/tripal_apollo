@@ -130,5 +130,7 @@ function tripal_apollo_user_table($type) {
     ]
   );
 
+  $output .= theme('pager');
+
   return $output;
 }
