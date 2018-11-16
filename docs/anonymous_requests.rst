@@ -31,7 +31,7 @@ To add Honeypot to the registration form, enable the Honeypot module, and simply
 
 .. code-block:: php
 
-  function form_alter(&$form, &$form_state, $form_id){
+  function my_custom_module_name_form_alter(&$form, &$form_state, $form_id){
       if ($form_id == "tripal_apollo_registration_form") {
           honeypot_add_form_protection($form, $form_state, array('honeypot', 'time_restriction'));
       }
