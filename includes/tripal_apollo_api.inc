@@ -122,9 +122,12 @@ function tripal_apollo_create_user_permissions($values, $instance_info) {
   $apollo_user_id = $values['apollo_user_id'];
 
   $user = $values['email'];
-  $name = explode(" ", $values['name'], 2);
-  $fname = $name[0];
-  $lname = isset($name[1]) ? $name[1] : $name[0];
+  $names = explode(" ", $values['name']);
+
+  $fname = $names[0];
+  unset($names[0]);
+  $lname = implode(" ", $names);
+  $lname = isset($lname) ? $lname : $fname;
 
   //For now we assume the group base is genus_species
   //see @ticket 41
@@ -230,9 +233,11 @@ function tripal_apollo_add_user($instance_id, $apollo_user_id, $role = 'USER') {
     ->execute()
     ->fetchObject();
 
-  $name = explode(" ", $user->name, 2);
-  $fname = $name[0];
-  $lname = isset($name[1]) ? $name[1] : $name[0];
+  $names = explode(" ", $user->name['name']);
+  $fname = $names[0];
+  unset($names[0]);
+  $lname = implode(" ", $names);
+  $lname = isset($lname) ? $lname : $fname;
 
   $instance_info = tripal_apollo_get_instance($instance_id);
 

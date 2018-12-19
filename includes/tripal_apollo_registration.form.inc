@@ -151,7 +151,7 @@ function tripal_apollo_registration_form($form, &$form_state) {
 function tripal_apollo_registration_form_validate($form, &$form_state) {
 
 
-  //Character validation
+  // Character validation.
   $name = $form_state['input']['name'];
   if (!preg_match('!^[\w @-]*$!', $name)) {
     form_set_error('name', t('Your Name can only contains numbers, letters @  - _.'));
