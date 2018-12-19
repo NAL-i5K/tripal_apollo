@@ -1,22 +1,25 @@
 <?php
 
+/**
+ * @file
+ */
+
 require_once 'includes/tripal_apollo_api.inc';
 require_once 'includes/tripal_apollo.node.inc';
 require_once 'includes/tripal_apollo_mail.inc';
 require_once 'includes/tripal_apollo_migrate_webapollo_content.inc';
 
-//forms dont need to be
-//require_once 'includes/tripal_apollo_admin.form.inc';
-//require_once 'includes/tripal_apollo_registration.form.inc';
-
-
+// Forms dont need to be
+// require_once 'includes/tripal_apollo_admin.form.inc';
+// require_once 'includes/tripal_apollo_registration.form.inc';.
 /**
  * Implements hook_permission().
  */
+
 function tripal_apollo_permission() {
   return [
     'administer tripal apollo' => [
-      //TODO: what form?
+      // TODO: what form?
       'title' => t('Administer tripal apollo form'),
     ],
     'administer apollo users' => [
@@ -28,6 +31,37 @@ function tripal_apollo_permission() {
   ];
 }
 
+/**
+ * Default implementation of hook_captcha().
+ */
+function tripal_apollo_captcha($op, $captcha_type = '') {
+  dpm("im firing");
+  $result = captcha_captcha($op, $captcha_type);
+
+  if (($op == 'generate') && ($captcha_type == 'Math')) {
+    $result = array();
+    $answer = mt_rand(1, 20);
+    $x = mt_rand(1, $answer);
+    $y = $answer - $x;
+    $result['solution'] = "$answer";
+
+    // Build challenge widget.
+    // Note that we also use t() for the math challenge itself. This makes
+    // it possible to 'rephrase' the challenge a bit through localization
+    // or string overrides.
+    $result['form']['captcha_response'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Math question'),
+      '#suffix' => "<div class='description'>Solve this math problem and enter the result to help us reduce spam. E.g. for 1+3, enter 4.</div>",
+      '#description' => t('Solve this simple math problem and enter the result to help us reduce spam. E.g. for 1+3, enter 4.'),
+      '#field_prefix' => "<span class='form-required'>" . t('@x + @y = ', array('@x' => $x, '@y' => $y)) . "</span>",
+      '#size' => 4,
+      '#maxlength' => 2,
+      '#required' => TRUE,
+    );
+  }
+  return $result;
+}
 
 /**
  * Implements hook_theme().
@@ -45,7 +79,6 @@ function tripal_apollo_theme($existing, $type, $theme, $path) {
       'render element' => 'form',
     ],
   ];
-
 
   return $items;
 }
@@ -70,7 +103,6 @@ function tripal_apollo_menu() {
     'description' => t("Tripal Apollo connects your tripal content, and Drupal users, to one or more Apollo servers."),
     'access arguments' => ['administer apollo users'],
   ];
-
 
   $items['admin/tripal/apollo/requests'] = [
     'title' => 'Apollo User Administration',
@@ -114,7 +146,6 @@ function tripal_apollo_menu() {
     'type' => MENU_LOCAL_TASK,
   ];
 
-
   $items['admin/tripal/apollo/migrate_web_apollo/'] = [
     'title' => 'MWA',
     'page callback' => 'drupal_get_form',
@@ -124,7 +155,6 @@ function tripal_apollo_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/tripal_apollo_approve_user_request.form.inc',
   ];
-
 
   $items['admin/tripal/apollo/requests/%'] = [
     'title' => 'Approve or Reject the user request for web apollo account',
@@ -157,10 +187,9 @@ function tripal_apollo_menu() {
     'type' => MENU_CALLBACK,
   ];
 
-
   //
   // USER Apollo requests and permissions
-  //
+  // .
   $items['user/%/apollo'] = [
     'title' => 'Apollo',
     'description' => 'Lets users view their permissions and request access to organisms.',
