@@ -233,12 +233,13 @@ function tripal_apollo_add_user($instance_id, $apollo_user_id, $role = 'USER') {
     ->execute()
     ->fetchObject();
 
-  $names = explode(" ", $user->name['name']);
+  $names = explode(" ", $user->name);
+
   $fname = $names[0];
   unset($names[0]);
   $lname = implode(" ", $names);
   $lname = isset($lname) ? $lname : $fname;
-
+  
   $instance_info = tripal_apollo_get_instance($instance_id);
 
   $path = '/user/createUser';
