@@ -38,8 +38,22 @@ Site-wide settings can be set at ``/admin/tripal_apollo``.
 
   **Important notice!!!**  Switching base tables will **wipe all information linking instances to records and records to users**.  Be very mindful of changing this setting!
 
+
+Password encryption
+~~~~~~~~~~~~~~~~~~~~~
+
+We encourage enabling password encryption.  However, disabling encryption is provided in case of issues setting up the encryption module.  https://www.drupal.org/project/encrypt
+
 .. note::
-  We encourage enabling password encryption.  However, disabling encryption is provided in case of issues setting up the encryption module.  https://www.drupal.org/project/encrypt
+
+	You may get a the following warning:
+
+	.. code-block:: php
+
+		Deprecated function: Function mcrypt_generic_init() is deprecated in _encrypt_encryption_methods_mcrypt_aes_cbc() (line 121 of /var/www/html/sites/all/modules/encrypt/plugins/encryption_methods/mcrypt_aes_cbc.inc)
+
+	This warning is due to mcrypt being marked for deprecation in PHP 7.1. In fact, we expect this to cause a more serious error in PHP 7.2.  This is a `known issue for the Drupal Encrypt module <https://www.drupal.org/project/encrypt/issues/2849072>`_, and if the warning is critical for you, there is a patch available for the encrypt module here: https://www.drupal.org/project/encrypt/issues/2983555
+
 
 
 Adding an Apollo Instance to Tripal

@@ -64,8 +64,8 @@ function tripal_apollo_schema() {
       ],
       'admin_password' => [
         'not null' => TRUE,
-        'type' => 'varchar',
-        'length' => 64,
+        'type' => 'text',
+        'size' => 'big',
         'description' => "Admin password on the Apollo instance.  For Apollo 1 this is the db user password, for Apollo 2 it is the apollo user's password.",
       ],
       'apollo_version' => [
@@ -310,8 +310,8 @@ function tripal_apollo_add_instance_user_organism_schemas($schema) {
         'description' => 'Unique user name.',
       ],
       'pass' => [
-        'type' => 'varchar',
-        'length' => 32,
+        'type' => 'text',
+        'size' => 'big',
         'not null' => TRUE,
         'default' => '',
         'description' => "User's password (md5 hash).",
